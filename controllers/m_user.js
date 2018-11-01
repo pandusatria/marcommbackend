@@ -181,14 +181,14 @@ const userController = {
         var data = {};
 
         data.username       = reqdata.username;
-        data.password       = reqdata.password;
+        data.password       = bcrypt.hashSync(reqdata.password, 8);
         data.m_role_id      = ObjectID(reqdata.m_role_id);
         data.m_employee_id  = ObjectID(reqdata.m_employee_id);
         data.is_delete      = false;
         data.created_by     = global.user.username;
         data.created_date   = now;
-        data.update_by      = null;
-        data.update_date    = null;
+        data.updated_by      = null;
+        data.updated_date    = null;
 
         var modelCreate = new UserModel(data);
 
@@ -198,8 +198,8 @@ const userController = {
                 return next(new Error());
             }
 
-            logger.info("Create Data User at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-            Response.send(res, 200, modelGetDetail);  
+            logger.info("User " + global.user.username + " Create Data User at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            Response.send(res, 200, data);  
         });
     },
 
@@ -231,7 +231,7 @@ const userController = {
             if(reqdata.password == null || reqdata.password == undefined || reqdata.password == "") {
                 updatemodel.password = oldmodel[0].password;
             } else {
-                updatemodel.password = reqdata.password;
+                updatemodel.password = bcrypt.hashSync(reqdata.password);
             }
             
             // tes oldmodel tanpa objectid dont forget that!!
@@ -247,12 +247,29 @@ const userController = {
                 updatemodel.m_employee_id = ObjectID(reqdata.m_employee_id);
             }
 
-            updatemodel.is_delete = oldmodel[0].is_delete;
+            updatemodel.is_delete = false;
             updatemodel.created_by = oldmodel[0].created_by;
             updatemodel.created_date = oldmodel[0].created_date;
             updatemodel.updated_by = global.user.username;
             updatemodel.updated_date = now;
 
+            var modelUpdate = new UserModel(updatemodel);
+
+            global.dbo.collection('m_user').findOneAndUpdate
+            (
+                {'_id' : ObjectID(id)},
+                {$set: modelUpdate},
+                function(err, data){
+                    if(err)
+                    {
+                        logger.error(error);
+                        return next(new Error());
+                    }
+
+                    logger.info("User " + global.user.username + " Update Data User at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                    Response.send(res, 200, data);
+                }
+            );
         });
     },
 
@@ -261,7 +278,7 @@ const userController = {
         var oldmodel = {};
         var deletemodel = {};
 
-        global.dbo.collection('m_user').find({ status : false, '_id' : ObjectID(id) }).toArray((error, data) => {
+        global.dbo.collection('m_user').find({ is_delete : false, '_id' : ObjectID(id) }).toArray((error, data) => {
             if(error) {
                 logger.error(error);
                 return next(new Error());
@@ -287,7 +304,7 @@ const userController = {
             global.dbo.collection('m_user').findOneAndUpdate
             (
                 {'_id' : ObjectID(id)},
-                {$set: model},
+                {$set: modelDelete},
                 function(err, data){
                     if(err)
                     {
@@ -295,6 +312,7 @@ const userController = {
                         return next(new Error());
                     }
 
+                    logger.info("User " + global.user.username + " Delete Data User at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
                     Response.send(res, 200, data);
                 }
             );
