@@ -37,7 +37,7 @@ DB.connect((err, db) => {
             }
         ));
 
-        //require('./routes/route')(server);
+        require('./routes/route')(server);
 
         server.listen(config.port, function(){
             logger.info(server.name + " call " +  server.url + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
