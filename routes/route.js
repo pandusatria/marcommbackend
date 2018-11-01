@@ -5,7 +5,12 @@ const corsMiddleware = require('restify-cors-middleware');
 const moment = require('moment');
 const logger = require('../config/log');
 
+<<<<<<< HEAD
 var user = require('../controllers/m_user');
+=======
+const msouvenir = require('../controllers/m_souvenir');
+const tsitem = require('../controllers/t_souvenir_item');
+>>>>>>> origin/viyankawr
 
 module.exports = exports = function(server){
 
@@ -24,9 +29,23 @@ module.exports = exports = function(server){
 
     // Set Route Path Here
 
+<<<<<<< HEAD
     // User
     server.post('/api/login', user.Login);
     server.get('/api/logout', user.Logout);
     server.get('/api/user/', Middleware.checkToken, user.GetAll);
     server.post('/api/user/:id', Middleware.checkToken, user.GetDetail);
+=======
+    //Route m_souvenir
+    server.get('/api/souvenir/', msouvenir.GetAll);
+    server.get('/api/souvenir/:id', msouvenir.GetDetail);
+    server.post('/api/souvenir/', msouvenir.Create);
+    server.put('/api/souvenir/:id', msouvenir.Update);
+    server.del('/api/souvenir/:id', msouvenir.Delete);
+
+    //Route t_souvenir_item
+    server.get('/api/tsitem/', tsitem.GetAll);
+    server.get('/api/tsitem/:id', tsitem.GetDetail);
+    server.post('/api/tsitem/', tsitem.Create);
+>>>>>>> origin/viyankawr
 };
