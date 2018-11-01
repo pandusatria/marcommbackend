@@ -7,12 +7,11 @@ const logger = require('../config/log');
 var m_employee = require('../controllers/m_employee');
 var m_company = require('../controllers/m_company');
 
-<<<<<<< HEAD
 var user = require('../controllers/m_user');
-=======
+
 const msouvenir = require('../controllers/m_souvenir');
 const tsitem = require('../controllers/t_souvenir_item');
->>>>>>> origin/viyankawr
+
 
 module.exports = exports = function(server){
 
@@ -30,15 +29,12 @@ module.exports = exports = function(server){
     logger.info("Route already accessed" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
     // Set Route Path Here
-<<<<<<< HEAD
-
-<<<<<<< HEAD
     // User
     server.post('/api/login', user.Login);
     server.get('/api/logout', user.Logout);
     server.get('/api/user/', Middleware.checkToken, user.GetAll);
     server.post('/api/user/:id', Middleware.checkToken, user.GetDetail);
-=======
+
     //Route m_souvenir
     server.get('/api/souvenir/', msouvenir.GetAll);
     server.get('/api/souvenir/:id', msouvenir.GetDetail);
@@ -50,8 +46,7 @@ module.exports = exports = function(server){
     server.get('/api/tsitem/', tsitem.GetAll);
     server.get('/api/tsitem/:id', tsitem.GetDetail);
     server.post('/api/tsitem/', tsitem.Create);
->>>>>>> origin/viyankawr
-=======
+
     // Route Employee
     server.get('/api/employee/', m_employee.GetAll);
     server.get('/api/employee/:id', m_employee.GetDetail);
@@ -61,8 +56,4 @@ module.exports = exports = function(server){
 
     //Route Company
     server.get('/api/company/', m_company.GetAll);
-
-
-
->>>>>>> origin/lutfi
 };
