@@ -4,6 +4,8 @@ const Middleware = require('../middleware/tokenauthorization');
 const corsMiddleware = require('restify-cors-middleware');
 const moment = require('moment');
 const logger = require('../config/log');
+var m_employee = require('../controllers/m_employee');
+var m_company = require('../controllers/m_company');
 
 <<<<<<< HEAD
 var user = require('../controllers/m_user');
@@ -28,6 +30,7 @@ module.exports = exports = function(server){
     logger.info("Route already accessed" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
     // Set Route Path Here
+<<<<<<< HEAD
 
 <<<<<<< HEAD
     // User
@@ -48,4 +51,18 @@ module.exports = exports = function(server){
     server.get('/api/tsitem/:id', tsitem.GetDetail);
     server.post('/api/tsitem/', tsitem.Create);
 >>>>>>> origin/viyankawr
+=======
+    // Route Employee
+    server.get('/api/employee/', m_employee.GetAll);
+    server.get('/api/employee/:id', m_employee.GetDetail);
+    server.post('/api/employee/', m_employee.Create);
+    server.put('/api/employee/:id', m_employee.Update);
+    server.del('/api/employee/:id', m_employee.Delete);
+
+    //Route Company
+    server.get('/api/company/', m_company.GetAll);
+
+
+
+>>>>>>> origin/lutfi
 };
