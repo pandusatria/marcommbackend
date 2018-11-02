@@ -51,11 +51,11 @@ module.exports = exports = function(server){
     // server.del('/api/souvenir/:id', msouvenir.Delete);
 
     //Route t_souvenir_item
-    server.get('/api/tsitem/', tsitem.GetAll);
-    server.get('/api/tsitem/:id', tsitem.GetDetail);
-    server.post('/api/tsitem/', tsitem.Create);
-    server.put('/api/tsitem/:id', tsitem.Update);
-    server.del('/api/tsitem/:id', tsitem.Delete);
+    // server.get('/api/tsitem/', tsitem.GetAll);
+    // server.get('/api/tsitem/:id', tsitem.GetDetail);
+    // server.post('/api/tsitem/', tsitem.Create);
+    // server.put('/api/tsitem/:id', tsitem.Update);
+    // server.del('/api/tsitem/:id', tsitem.Delete);
 
     // Route Employee
     server.get('/api/employee/', m_employee.GetAll);
