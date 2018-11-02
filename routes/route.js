@@ -4,13 +4,13 @@ const Middleware = require('../middleware/tokenauthorization');
 const corsMiddleware = require('restify-cors-middleware');
 const moment = require('moment');
 const logger = require('../config/log');
-// var m_employee = require('../controllers/m_employee');
-// var m_company = require('../controllers/m_company');
+
+var m_employee = require('../controllers/m_employee');
+var m_company = require('../controllers/m_company');
 var m_user = require('../controllers/m_user');
 
-//const msouvenir = require('../controllers/m_souvenir');
-//const tsitem = require('../controllers/t_souvenir_item');
-
+const msouvenir = require('../controllers/m_souvenir');
+var t_sitem = require('../controllers/t_souvenir_item');
 
 module.exports = exports = function(server){
 
@@ -28,6 +28,7 @@ module.exports = exports = function(server){
     logger.info("Route already accessed" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
     // Set Route Path Here
+
     // Route User
     server.post('/api/login', m_user.Login);
     server.get('/api/logout', m_user.Logout);
@@ -38,24 +39,27 @@ module.exports = exports = function(server){
     server.del('/api/user/:id', Middleware.checkToken, m_user.Delete);
 
     //Route m_souvenir
-    // server.get('/api/souvenir/', msouvenir.GetAll);
-    // server.get('/api/souvenir/:id', msouvenir.GetDetail);
-    // server.post('/api/souvenir/', msouvenir.Create);
-    // server.put('/api/souvenir/:id', msouvenir.Update);
-    // server.del('/api/souvenir/:id', msouvenir.Delete);
+    server.get('/api/souvenir/', msouvenir.GetAll);
+    server.get('/api/souvenir/:id', msouvenir.GetDetail);
+    server.post('/api/souvenir/', msouvenir.Create);
+    server.put('/api/souvenir/:id', msouvenir.Update);
+    server.del('/api/souvenir/:id', msouvenir.Delete);
 
-    // //Route t_souvenir_item
-    // server.get('/api/tsitem/', tsitem.GetAll);
-    // server.get('/api/tsitem/:id', tsitem.GetDetail);
-    // server.post('/api/tsitem/', tsitem.Create);
+    //Route t_souvenir_item
+    server.get('/api/tsitem/', Middleware.checkToken, t_sitem.GetAll);
+    server.get('/api/tsitem/:id', Middleware.checkToken, t_sitem.GetDetail);
+    server.post('/api/tsitem/', Middleware.checkToken, t_sitem.Create);
+    server.put('/api/tsitem/:id', Middleware.checkToken, t_sitem.Update);
+    server.del('/api/tsitem/:id', Middleware.checkToken, t_sitem.Delete);
 
-    // // Route Employee
-    // server.get('/api/employee/', m_employee.GetAll);
-    // server.get('/api/employee/:id', m_employee.GetDetail);
-    // server.post('/api/employee/', m_employee.Create);
-    // server.put('/api/employee/:id', m_employee.Update);
-    // server.del('/api/employee/:id', m_employee.Delete);
+    // Route Employee
+    server.get('/api/employee/', m_employee.GetAll);
+    server.get('/api/employee/:id', m_employee.GetDetail);
+    server.post('/api/employee/', m_employee.Create);
+    server.put('/api/employee/:id', m_employee.Update);
+    server.del('/api/employee/:id', m_employee.Delete);
 
-    // //Route Company
-    // server.get('/api/company/', m_company.GetAll);
+    //Route Company
+    server.get('/api/company/', m_company.GetAll);
+
 };
