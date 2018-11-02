@@ -156,131 +156,149 @@ const TSItemController = {
             Response.send(res, 200, data);
         });
     },
-    // Update : (req, res, next) => {
-    //     logger.info("Initialized Souvenir : Update" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+    Update : (req, res, next) => {
+        logger.info("Initialized Transaction Item Souvenir : Update" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
-    //     let id = req.params.id;
-    //     let reqdata = req.body;
-    //     var oldmodel = {};
-    //     var updatemodel = {};
+        let id = req.params.id;
+        let reqdata = req.body;
+        var oldmodel = {};
+        var updatemodel = {};
 
-    //     global.dbo.collection('m_souvenir').find({is_delete : false, '_id' : ObjectID(id)}).toArray((err, data) => {
-    //         if(err)
-    //         {
-    //             logger.info("Souvenir : Update Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-    //             logger.error(err);
-    //             return next(new Error());
-    //         }
+        global.dbo.collection('t_souvenir_item').find({is_delete : false, '_id' : ObjectID(id)}).toArray((err, data) => {
+            if(err)
+            {
+                logger.info("Transaction Item Souvenir : Update Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                logger.error(err);
+                return next(new Error());
+            }
 
-    //         oldmodel = data.map((entity) => {
-    //             return new msouvenirModel(entity);
-    //         });
+            oldmodel = data.map((entity) => {
+                return new tsitemModel(entity);
+            });
 
-    //         updatemodel._id = ObjectID(id);
+            updatemodel._id = ObjectID(id);
 
-    //         if(reqdata.code == null || reqdata.code == undefined || reqdata.code == "")
-    //         {
-    //             updatemodel.code = oldmodel[0].code;
-    //         }
-    //         else
-    //         {
-    //             updatemodel.code = reqdata.code; 
-    //         }
+            if(reqdata.t_souvenir_id == null || reqdata.t_souvenir_id == undefined || reqdata.t_souvenir_id == "")
+            {
+                updatemodel.t_souvenir_id = oldmodel[0].t_souvenir_id;
+            }
+            else
+            {
+                updatemodel.t_souvenir_id = ObjectID(reqdata.t_souvenir_id); 
+            }
 
-    //         if(reqdata.name == null || reqdata.name == undefined || reqdata.name == "")
-    //         {
-    //             updatemodel.name = oldmodel[0].name;
-    //         }
-    //         else
-    //         {
-    //             updatemodel.name = reqdata.name;   
-    //         }
+            if(reqdata.m_souvenir_id == null || reqdata.m_souvenir_id == undefined || reqdata.m_souvenir_id == "")
+            {
+                updatemodel.m_souvenir_id = oldmodel[0].m_souvenir_id;
+            }
+            else
+            {
+                updatemodel.m_souvenir_id = ObjectID(reqdata.m_souvenir_id);   
+            }
 
-    //         if(reqdata.description == null || reqdata.description == undefined || reqdata.description == "")
-    //         {
-    //             updatemodel.description = oldmodel[0].description;
-    //         }
-    //         else
-    //         {
-    //             updatemodel.description = reqdata.description;   
-    //         }
+            if(reqdata.qty == null || reqdata.qty == undefined || reqdata.qty == "")
+            {
+                updatemodel.qty = oldmodel[0].qty;
+            }
+            else
+            {
+                updatemodel.qty = reqdata.qty;   
+            }
 
-    //         updatemodel.m_unit_id = ObjectID(reqdata.m_unit_id);
-    //         updatemodel.is_delete = false;
-    //         updatemodel.created_by = oldmodel[0].created_by;
-    //         updatemodel.created_date = oldmodel[0].created_date;
-    //         updatemodel.updated_by = oldmodel[0].updated_by;
-    //         updatemodel.updated_date = now;
+            if(reqdata.qty_settlement == null || reqdata.qty_settlement == undefined || reqdata.qty_settlement == "")
+            {
+                updatemodel.qty_settlement = oldmodel[0].qty_settlement;
+            }
+            else
+            {
+                updatemodel.qty_settlement = reqdata.qty_settlement;   
+            }
+
+            if(reqdata.note == null || reqdata.note == undefined || reqdata.note == "")
+            {
+                updatemodel.note = oldmodel[0].note;
+            }
+            else
+            {
+                updatemodel.note = reqdata.note;   
+            }
+
+            updatemodel.is_delete = false;
+            updatemodel.created_by = oldmodel[0].created_by;
+            updatemodel.created_date = oldmodel[0].created_date;
+            updatemodel.updated_by = oldmodel[0].updated_by;
+            updatemodel.updated_date = now;
             
-    //         var model = new msouvenirModel(updatemodel);
+            var model = new tsitemModel(updatemodel);
 
-    //         global.dbo.collection('m_souvenir').findOneAndUpdate
-    //         (
-    //             {'_id' : ObjectID(id)},
-    //             {$set: model},
-    //             function(err, data){
-    //                 if(err)
-    //                 {
-    //                     logger.info("Souvenir : Update Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-    //                     logger.error(err);
-    //                     return next(new Error());
-    //                 }
-    //                 logger.info("Souvenir : Create successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-    //                 logger.info({data : data}, "Souvenir : Create content");
-    //                 Response.send(res, 200, data);
-    //             }
-    //         );
-    //     });
-    // },
-    // Delete : (req, res, next) => {
-    //     logger.info("Initialized Souvenir : Delete" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            global.dbo.collection('t_souvenir_item').findOneAndUpdate
+            (
+                {'_id' : ObjectID(id)},
+                {$set: model},
+                function(err, data){
+                    if(err)
+                    {
+                        logger.info("Transaction Item Souvenir : Update Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                        logger.error(err);
+                        return next(new Error());
+                    }
+                    logger.info("Transaction Item Souvenir : Update successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                    logger.info({data : data}, "Transaction Item Souvenir : Update content");
+                    Response.send(res, 200, data);
+                }
+            );
+        });
+    },
+    Delete : (req, res, next) => {
+        logger.info("Initialized Transaction Item Souvenir : Delete" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
-    //     let id = req.params.id;
-    //     var oldmodel = {};
-    //     var deletemodel = {};
+        let id = req.params.id;
+        var oldmodel = {};
+        var deletemodel = {};
 
-    //     global.dbo.collection('m_souvenir').find({is_delete : false, '_id' : ObjectID(id)}).toArray((err, data) => {
-    //         if(err)
-    //         {
-    //             logger.info("Souvenir : Delete Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-    //             logger.error(err);
-    //             return next(new Error());
-    //         }
+        global.dbo.collection('t_souvenir_item').find({is_delete : false, '_id' : ObjectID(id)}).toArray((err, data) => {
+            if(err)
+            {
+                logger.info("Transaction Item Souvenir : Delete Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                logger.error(err);
+                return next(new Error());
+            }
 
-    //         oldmodel = data.map((entity) => {
-    //             return new msouvenirModel(entity);
-    //         });
+            oldmodel = data.map((entity) => {
+                return new tsitemModel(entity);
+            });
 
-    //         deletemodel._id = ObjectID(id);
-    //         deletemodel.code = oldmodel[0].code;
-    //         deletemodel.name = oldmodel[0].name;
-    //         deletemodel.description = oldmodel[0].description;
-    //         deletemodel.m_unit_id = oldmodel[0].m_unit_id;
-    //         deletemodel.is_delete = true;
-    //         deletemodel.created_by = oldmodel[0].created_by;
-    //         deletemodel.created_date = oldmodel[0].created_date;
-    //         deletemodel.updated_by = oldmodel[0].updated_by;
-    //         deletemodel.updated_date = now;
+            deletemodel._id = ObjectID(id);
+            deletemodel.t_souvenir_id = oldmodel[0].t_souvenir_id;
+            deletemodel.m_souvenir_id = oldmodel[0].m_souvenir_id;
+            deletemodel.qty = oldmodel[0].qty;
+            deletemodel.qty_settlement = oldmodel[0].qty_settlement;
+            deletemodel.note = oldmodel[0].note;
+            deletemodel.is_delete = true;
+            deletemodel.created_by = oldmodel[0].created_by;
+            deletemodel.created_date = oldmodel[0].created_date;
+            deletemodel.updated_by = oldmodel[0].updated_by;
+            deletemodel.updated_date = now;
 
-    //         var model = new msouvenirModel(deletemodel);
+            var model = new tsitemModel(deletemodel);
 
-    //         global.dbo.collection('m_souvenir').findOneAndUpdate
-    //         (
-    //             {'_id' : ObjectID(id)},
-    //             {$set: model},
-    //             function(err, data){
-    //                 if(err)
-    //                 {
-    //                     logger.info("Souvenir : Delete Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-    //                     logger.error(err);
-    //                     return next(new Error());
-    //                 }
-    //                 logger.info("Souvenir : Delete successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-    //                 logger.info({data : data}, "Souvenir : Delete content");
-    //                 Response.send(res, 200, data);
-    //             }
-    //         );
-    //     });
-    // }
+            global.dbo.collection('t_souvenir_item').findOneAndUpdate
+            (
+                {'_id' : ObjectID(id)},
+                {$set: model},
+                function(err, data){
+                    if(err)
+                    {
+                        logger.info("Transaction Item Souvenir : Delete Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                        logger.error(err);
+                        return next(new Error());
+                    }
+                    logger.info("Transaction Item Souvenir : Delete successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                    logger.info({data : data}, "Transaction Item Souvenir : Delete content");
+                    Response.send(res, 200, data);
+                }
+            );
+        });
+    }
 };
 module.exports = TSItemController;
