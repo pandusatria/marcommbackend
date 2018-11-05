@@ -9,6 +9,7 @@ var m_company = require('../controllers/m_company');
 var m_user = require('../controllers/m_user');
 const msouvenir = require('../controllers/m_souvenir');
 const tsitem = require('../controllers/t_souvenir_item');
+const tsouvenir = require('../controllers/t_souvenir');
 
 module.exports = exports = function(server){
 
@@ -43,10 +44,19 @@ module.exports = exports = function(server){
     server.put('/api/souvenir/:id', msouvenir.Update);
     server.del('/api/souvenir/:id', msouvenir.Delete);
 
+    //Route t_souvenir
+    server.get('/api/tsouvenir/', tsouvenir.GetAll);
+    server.get('/api/tsouvenir/:id', tsouvenir.GetDetail);
+    // server.post('/api/souvenir/', msouvenir.Create);
+    // server.put('/api/souvenir/:id', msouvenir.Update);
+    // server.del('/api/souvenir/:id', msouvenir.Delete);
+
     //Route t_souvenir_item
-    server.get('/api/tsitem/', tsitem.GetAll);
-    server.get('/api/tsitem/:id', tsitem.GetDetail);
-    server.post('/api/tsitem/', tsitem.Create);
+    // server.get('/api/tsitem/', tsitem.GetAll);
+    // server.get('/api/tsitem/:id', tsitem.GetDetail);
+    // server.post('/api/tsitem/', tsitem.Create);
+    // server.put('/api/tsitem/:id', tsitem.Update);
+    // server.del('/api/tsitem/:id', tsitem.Delete);
 
     // Route Employee
     server.get('/api/employee/', m_employee.GetAll);

@@ -113,7 +113,7 @@ const MSouvenirController = {
         data.description = reqdata.description;
         data.m_unit_id = ObjectID(reqdata.m_unit_id);
         data.is_delete = false;
-        data.created_by = reqdata.created_by;
+        data.created_by = "Administrator";
         data.created_date = now;
         data.updated_by = null;
         data.updated_date = null;
@@ -192,13 +192,13 @@ const MSouvenirController = {
             }
             else
             {
-                updatemodel.m_unit_id = reqdata.m_unit_id;   
+                updatemodel.m_unit_id = ObjectID(reqdata.m_unit_id);   
             }
 
             updatemodel.is_delete = false;
             updatemodel.created_by = oldmodel[0].created_by;
             updatemodel.created_date = oldmodel[0].created_date;
-            updatemodel.updated_by = oldmodel[0].updated_by;
+            updatemodel.updated_by = "Administrator";
             updatemodel.updated_date = now;
             
             var model = new msouvenirModel(updatemodel);
