@@ -316,7 +316,7 @@ const MSouvenirController = {
             deletemodel.is_delete = true;
             deletemodel.created_by = oldmodel[0].created_by;
             deletemodel.created_date = oldmodel[0].created_date;
-            deletemodel.updated_by = oldmodel[0].updated_by;
+            deletemodel.updated_by = global.user.role;
             deletemodel.updated_date = now;
 
             var model = new msouvenirModel(deletemodel);
