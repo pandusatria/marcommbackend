@@ -5,6 +5,7 @@ const Response = require('../config/response');
 const ObjectID = require('mongodb').ObjectID;
 const m_employeeModel = require('../models/m_employee.model');
 
+// const now = moment().format();
 const now = new Date();
 
 const EmployeeController = {
@@ -35,6 +36,7 @@ const EmployeeController = {
                 employee_name : { $concat: [ "$first_name", " ", "$last_name" ] },
                 first_name : "$first_name",
                 last_name : "$last_name",
+                m_company_id : "$company_lookup._id",
                 company_name : "$company_lookup.name",
                 email : "$email",
                 is_delete : "$is_delete",
@@ -119,7 +121,7 @@ const EmployeeController = {
         data.m_company_id       = ObjectID(reqdata.m_company_id);
         data.email              = reqdata.email;
         data.is_delete          = false;
-        data.created_by         = "Administrator";
+        data.created_by         = global.user.role;
         data.created_date       = now;
         data.updated_by         = null;
         data.updated_date       = null;
@@ -198,7 +200,7 @@ const EmployeeController = {
             updatemodel.is_delete          = oldmodel[0].is_delete;
             updatemodel.created_by         = oldmodel[0].created_by;
             updatemodel.created_date       = oldmodel[0].created_date;
-            updatemodel.updated_by         = "Administrator2";
+            updatemodel.updated_by         = global.user.role;
             updatemodel.updated_date       = now;
 
             var model = new m_employeeModel(updatemodel);
