@@ -18,18 +18,69 @@ const userController = {
         var username = req.body.username;
         var password = req.body.password;
 
-        logger.info("User Access Login" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+        logger.info("Initialized Login" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
         if(username == null || password == null) {
             logger.info("Login Failed, username / password is null" + " Try to Login at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
             Response.send(res, 404, "Username or Password is null");
         } else {
-            global.dbo.collection('m_user').findOne({ username : username }, (err, data) => {
-                if(data) {
-                    logger.info("Username : " + data.username + " Try to Login at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-                    
-                    if(bcrypt.compareSync(password, data.password)) {
-                        let token = jwt.sign(data, secret.secretkey, {
+           global.dbo.collection('m_user').aggregate([
+                {
+                    $match : 
+                    { 
+                        is_delete : false,
+                        username : username
+                    }
+                },
+                {
+                    $lookup :
+                    {
+                        from : "m_role",
+                        localField : "m_role_id",
+                        foreignField : "_id",
+                        as : "Show_Role"
+                    }
+                },
+                {
+                    $unwind : "$Show_Role"
+                },
+                {
+                    $lookup :
+                    {
+                        from : "m_employee",
+                        localField : "m_employee_id",
+                        foreignField : "_id",
+                        as : "Show_Employee"
+                    }
+                },
+                {
+                    $unwind : "$Show_Employee"
+                },
+                {
+                    $project :
+                    {
+                        username : "$username",
+                        password : "$password",
+                        role : "$Show_Role.name",
+                        employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                        email : "$Show_Employee.email",
+                        is_delete : "$is_delete",
+                        created_by : "$created_by",
+                        created_date : "$created_date",
+                        update_by : "$updated_by",
+                        update_date : "$updated_date"
+                    }
+                }
+           ]).toArray((error, data) => {
+            console.log("cek data");   
+            console.log(data);
+                if(data.length > 0) {
+                    logger.info("Username : " + data[0].username + " Try to Login at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                    console.log("Debug");
+                    console.log(data);
+                    console.log(data[0].password);
+                    if(bcrypt.compareSync(password, data[0].password)) {
+                        let token = jwt.sign(data[0], secret.secretkey, {
                             expiresIn: 7200 // 3600 * 2 = 2jam
                         });
 
@@ -42,17 +93,22 @@ const userController = {
 
                         logger.info("Username : " + data.username + " Success Login at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
                         Response.send(res, 200, doc);
+                    } else {
+                        logger.info("Login Failed, password does not exist" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                        Response.send(res, 404, "Password wrong");
                     }
 
                 } else {
                     logger.info("Login Failed, user does not exist" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
                     Response.send(res, 404, "User Does not Exist");
-                }
-            });
+                } 
+           });
         }
     },
 
     Logout : (req, res, next) => {
+        logger.info("Initialized Logout" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
         let doc = {
             status : "Logout Success",
             userdata : null,
@@ -64,6 +120,8 @@ const userController = {
     },
 
     GetAll : (req, res, next) => {
+        logger.info("Initialized Master User : GetAll" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
         global.dbo.collection('m_user').aggregate([
             {
                 $match : { is_delete : false }
@@ -93,12 +151,28 @@ const userController = {
                 $unwind : "$Show_Employee"
             },
             {
+            	$lookup :
+            	{
+            		from : "m_company",
+                    localField : "Show_Employee.m_company_id",
+                    foreignField : "_id",
+                    as : "Show_Company"
+            	}
+            },
+            {
+            	$unwind : "$Show_Company"
+            },
+            {
                 $project :
                 {
                     username : "$username",
                     password : "$password",
                     role : "$Show_Role.name",
-                    employe : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                    m_role_id : "$m_role_id",
+                    m_employee_id : "$m_employee_id",
+                    employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                    email : "$Show_Employee.email",
+                    company : "$Show_Company.name",
                     is_delete : "$is_delete",
                     created_by : "$created_by",
                     created_date : "$created_date",
@@ -118,7 +192,9 @@ const userController = {
     },
 
     GetDetail : (req, res, next) => {
+        logger.info("Initialized Master User : GetDetail" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
         let id = req.params.id;
+
         global.dbo.collection('m_user').aggregate([
             {
                 $match : 
@@ -157,7 +233,7 @@ const userController = {
                     username : "$username",
                     password : "$password",
                     role : "$Show_Role.name",
-                    employe : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                    employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
                     is_delete : "$is_delete",
                     created_by : "$created_by",
                     created_date : "$created_date",
@@ -177,18 +253,20 @@ const userController = {
     },
 
     Create : (req, res, next) => {
+        logger.info("Initialized Master User : Create" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
         let reqdata = req.body;
         var data = {};
 
         data.username       = reqdata.username;
-        data.password       = reqdata.password;
+        data.password       = bcrypt.hashSync(reqdata.password, 8);
         data.m_role_id      = ObjectID(reqdata.m_role_id);
         data.m_employee_id  = ObjectID(reqdata.m_employee_id);
         data.is_delete      = false;
-        data.created_by     = global.user.username;
+        data.created_by     = global.user.role;
         data.created_date   = now;
-        data.update_by      = null;
-        data.update_date    = null;
+        data.updated_by     = null;
+        data.updated_date   = null;
 
         var modelCreate = new UserModel(data);
 
@@ -198,12 +276,14 @@ const userController = {
                 return next(new Error());
             }
 
-            logger.info("Create Data User at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-            Response.send(res, 200, modelGetDetail);  
+            logger.info("User " + global.user.username + " Create Data User at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            Response.send(res, 200, data);  
         });
     },
 
     Update : (req, res, next) => {
+        logger.info("Initialized Master User : Update" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
         let id = req.params.id;
         let reqdata = req.body;
         var oldmodel = {};
@@ -231,7 +311,7 @@ const userController = {
             if(reqdata.password == null || reqdata.password == undefined || reqdata.password == "") {
                 updatemodel.password = oldmodel[0].password;
             } else {
-                updatemodel.password = reqdata.password;
+                updatemodel.password = bcrypt.hashSync(reqdata.password);
             }
             
             // tes oldmodel tanpa objectid dont forget that!!
@@ -247,21 +327,40 @@ const userController = {
                 updatemodel.m_employee_id = ObjectID(reqdata.m_employee_id);
             }
 
-            updatemodel.is_delete = oldmodel[0].is_delete;
+            updatemodel.is_delete = false;
             updatemodel.created_by = oldmodel[0].created_by;
             updatemodel.created_date = oldmodel[0].created_date;
             updatemodel.updated_by = global.user.username;
             updatemodel.updated_date = now;
 
+            var modelUpdate = new UserModel(updatemodel);
+
+            global.dbo.collection('m_user').findOneAndUpdate
+            (
+                {'_id' : ObjectID(id)},
+                {$set: modelUpdate},
+                function(err, data){
+                    if(err)
+                    {
+                        logger.error(error);
+                        return next(new Error());
+                    }
+
+                    logger.info("User " + global.user.username + " Update Data User at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                    Response.send(res, 200, data);
+                }
+            );
         });
     },
 
     Delete : (req, res, next) => {
+        logger.info("Initialized Master User : Delete" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
         let id = req.params.id;
         var oldmodel = {};
         var deletemodel = {};
 
-        global.dbo.collection('m_user').find({ status : false, '_id' : ObjectID(id) }).toArray((error, data) => {
+        global.dbo.collection('m_user').find({ is_delete : false, '_id' : ObjectID(id) }).toArray((error, data) => {
             if(error) {
                 logger.error(error);
                 return next(new Error());
@@ -287,7 +386,7 @@ const userController = {
             global.dbo.collection('m_user').findOneAndUpdate
             (
                 {'_id' : ObjectID(id)},
-                {$set: model},
+                {$set: modelDelete},
                 function(err, data){
                     if(err)
                     {
@@ -295,11 +394,104 @@ const userController = {
                         return next(new Error());
                     }
 
+                    logger.info("User " + global.user.username + " Delete Data User at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
                     Response.send(res, 200, data);
                 }
             );
 
         });
+    },
+
+    Search : (req, res, next) => {
+        logger.info("Initialized Master User : Search" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
+        let reqdata = req.body;
+
+        let match = {};
+
+        for(var i = 0; i < reqdata.filter.length; i++){
+            match[reqdata.filter[i].id] = reqdata.filter[i].value;
+        }
+
+        console.log("debuggg");
+        console.log(match);
+
+        global.dbo.collection('m_user').aggregate([
+            {
+                $lookup :
+                {
+                    from : "m_role",
+                    localField : "m_role_id",
+                    foreignField : "_id",
+                    as : "Show_Role"
+                }
+            },
+            {
+                $unwind : "$Show_Role"
+            },
+            {
+                $lookup :
+                {
+                    from : "m_employee",
+                    localField : "m_employee_id",
+                    foreignField : "_id",
+                    as : "Show_Employee"
+                }
+            },
+            {
+                $unwind : "$Show_Employee"
+            },
+            {
+            	$lookup :
+            	{
+            		from : "m_company",
+                    localField : "Show_Employee.m_company_id",
+                    foreignField : "_id",
+                    as : "Show_Company"
+            	}
+            },
+            {
+            	$unwind : "$Show_Company"
+            },
+            {
+                $project :
+                {
+                    username : "$username",
+                    password : "$password",
+                    role : "$Show_Role.name",
+                    m_role_id : "$m_role_id",
+                    m_employee_id : "$m_employee_id",
+                    employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                    email : "$Show_Employee.email",
+                    company : "$Show_Company.name",
+                    is_delete : "$is_delete",
+                    created_by : "$created_by",
+                    created_date : "$created_date",
+                    update_by : "$updated_by",
+                    update_date : "$updated_date"
+                }
+            },
+            {
+                $match : 
+                {
+                    $and:
+                    [
+                        match
+                    ]
+                }
+            }
+        ]).toArray((error, data) => {
+            if(error) {
+                logger.error(error);
+                return next(new Error());
+            }
+
+            logger.info("Showing Data User using search to " + global.user.username + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            Response.send(res, 200, data);   
+            console.log("try....")
+            console.log(data);
+        });
+
     }
 };
 
