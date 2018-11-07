@@ -7,11 +7,59 @@ const logger = require('../config/log');
 const tsouvenirModel = require('../models/t_souvenir.model');
 var now = new Date();
 
-const TSItemController = {
+const TSController = {
     GetAll : (req, res, next) => {
         logger.info("Initialized Transaction Item Souvenir : GetAll" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
-        global.dbo.collection('t_souvenir').find({is_delete : false}).toArray((err, data) => {
+        global.dbo.collection('t_souvenir').aggregate([
+            {
+                $lookup : {
+                from : "m_employee",
+                localField : "received_by",
+                foreignField : "_id",
+                as : "employee_lkup"
+                }
+            },
+            {
+                $unwind : "$employee_lkup"  
+            },
+            {
+                $lookup : {
+                from : "t_event",
+                localField : "t_event_id",
+                foreignField : "_id",
+                as : "tevent_lkup"
+                }
+            },
+            {
+                $unwind : "$tevent_lkup"  
+            },
+            {
+                $match : { is_delete : false}
+            },
+            {
+                $project:
+                {
+                    "_id" : "$_id", 
+                    "code" : "$code", 
+                    "type" : "$type",
+                    "t_event_id" : "$tevent_lkup._id",
+                    "status_event" : "$tevent_lkup.status", 
+                    
+                    "received_by" : "$employee_lkup._id", 
+                    "name_receiver" : { $concat: [ "$employee_lkup.first_name", " ", "$employee_lkup.last_name"] },
+                    "received_date" : "$received_date",
+                    "note" : "$note",
+                    
+                    
+                    "is_delete" : "$is_delete",
+                    "created_by" : "$created_by",
+                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
+                    "updated_by" : "$updated_by",
+                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } }    
+                }
+            }	
+        ]).toArray((err, data) => {
             if(err)
             {
                 logger.info("Transaction Item Souvenir  : GetAll Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
@@ -29,7 +77,55 @@ const TSItemController = {
 
         let id = req.params.id;
         
-        global.dbo.collection('t_souvenir').find({is_delete : false}).toArray((err, data) => {
+        global.dbo.collection('t_souvenir').aggregate([
+            {
+                $lookup : {
+                from : "m_employee",
+                localField : "received_by",
+                foreignField : "_id",
+                as : "employee_lkup"
+                }
+            },
+            {
+                $unwind : "$employee_lkup"  
+            },
+            {
+                $lookup : {
+                from : "t_event",
+                localField : "t_event_id",
+                foreignField : "_id",
+                as : "tevent_lkup"
+                }
+            },
+            {
+                $unwind : "$tevent_lkup"  
+            },
+            {
+                $match : { is_delete : false}
+            },
+            {
+                $project:
+                {
+                    "_id" : "$_id", 
+                    "code" : "$code", 
+                    "type" : "$type",
+                    "t_event_id" : "$t_event_id",
+                    "status_event" : "$tevent_lkup.status", 
+                    
+                    "received_by" : "$received_by", 
+                    "name_receiver" : { $concat: [ "$employee_lkup.first_name", " ", "$employee_lkup.last_name"] },
+                    "received_date" : "$received_date",
+                    "note" : "$note",
+                    
+                    
+                    "is_delete" : "$is_delete",
+                    "created_by" : "$created_by",
+                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
+                    "updated_by" : "$updated_by",
+                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } }   
+                }
+            }	
+        ]).toArray((err, data) => {
             if(err)
             {
                 logger.info("Transaction Item Souvenir  : GetDetail Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
@@ -39,6 +135,89 @@ const TSItemController = {
 
             logger.info("Transaction Item Souvenir  : GetDetail successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
             logger.info({data : data}, "Transaction Item Souvenir  : GetDetail content");
+            Response.send(res, 200, data);
+        });
+    },
+    GetAllHandlerSearch : (req, res, next) => {
+        logger.info("Initialized Souvenir : GetAllHandlerSearch" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
+        let search = req.body;
+        console.log("Request");
+        console.log(search.filter);
+
+        var myMatch = {};
+        for (var i = 0; i < search.filter.length; i++) 
+        {
+            myMatch[search.filter[i].id] = search.filter[i].value;
+        }
+
+        console.log("My Match : ");
+        console.log(myMatch);
+
+
+        global.dbo.collection('t_souvenir').aggregate([
+            {
+                $lookup : {
+                from : "m_employee",
+                localField : "received_by",
+                foreignField : "_id",
+                as : "employee_lkup"
+                }
+            },
+            {
+                $unwind : "$employee_lkup"  
+            },
+            {
+                $lookup : {
+                from : "t_event",
+                localField : "t_event_id",
+                foreignField : "_id",
+                as : "tevent_lkup"
+                }
+            },
+            {
+                $unwind : "$tevent_lkup"  
+            },
+            {
+                $project:
+                {
+                    "_id" : "$_id", 
+                    "code" : "$code", 
+                    "type" : "$type",
+                    "t_event_id" : "$t_event_id",
+                    "status_event" : "$tevent_lkup.status", 
+                    
+                    "received_by" : "$received_by", 
+                    "name_receiver" : { $concat: [ "$employee_lkup.first_name", " ", "$employee_lkup.last_name"] },
+                    "received_date" : "$received_date",
+                    "note" : "$note",
+                    
+                    
+                    "is_delete" : "$is_delete",
+                    "created_by" : "$created_by",
+                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
+                    "updated_by" : "$updated_by",
+                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } }    
+                }
+            },	
+            {
+                $match: {
+                    $and:
+                    [
+                        myMatch
+                    ]
+                }
+            }
+        ]).toArray((err, data) => {
+            if(err)
+            {
+                logger.info("Souvenir : GetAllHandlerSearch Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                logger.error(err);
+                return next(new Error());
+            }
+
+            logger.info("Souvenir : GetAllHandlerSearch successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            logger.info({data : data}, "Souvenir : GetAllHandlerSearch content");
             Response.send(res, 200, data);
         });
     },
@@ -167,30 +346,45 @@ const TSItemController = {
     //     });
     // },
     // Delete : (req, res, next) => {
-    //     logger.info("Initialized Transaction Item Souvenir : Delete" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+    //     logger.info("Initialized Transaction Souvenir : Delete" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
     //     let id = req.params.id;
     //     var oldmodel = {};
     //     var deletemodel = {};
 
-    //     global.dbo.collection('t_souvenir_item').find({is_delete : false, '_id' : ObjectID(id)}).toArray((err, data) => {
+    //     global.dbo.collection('t_souvenir').find({is_delete : false, '_id' : ObjectID(id)}).toArray((err, data) => {
     //         if(err)
     //         {
-    //             logger.info("Transaction Item Souvenir : Delete Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+    //             logger.info("Transaction Souvenir : Delete Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
     //             logger.error(err);
     //             return next(new Error());
     //         }
 
     //         oldmodel = data.map((entity) => {
-    //             return new tsitemModel(entity);
+    //             return new tsouvenirModel(entity);
     //         });
 
     //         deletemodel._id = ObjectID(id);
-    //         deletemodel.t_souvenir_id = oldmodel[0].t_souvenir_id;
-    //         deletemodel.m_souvenir_id = oldmodel[0].m_souvenir_id;
-    //         deletemodel.qty = oldmodel[0].qty;
-    //         deletemodel.qty_settlement = oldmodel[0].qty_settlement;
+    //         deletemodel.code = oldmodel[0].code;
+    //         deletemodel.type = oldmodel[0].type;
+    //         deletemodel.t_event_id = oldmodel[0].t_event_id;
+    //         deletemodel.request_by = oldmodel[0].request_by;
+    //         deletemodel.request_date = oldmodel[0].request_date;
+
+    //         deletemodel.request_due_date = oldmodel[0].request_due_date;
+    //         deletemodel.approved_by = oldmodel[0].approved_by;
+    //         deletemodel.approved_date = oldmodel[0].approved_date;
+    //         deletemodel.received_by = oldmodel[0].received_by;
+    //         deletemodel.received_date = oldmodel[0].received_date;
+
+    //         deletemodel.settlement_by = oldmodel[0].settlement_by;
+    //         deletemodel.settlement_date = oldmodel[0].settlement_date;
+    //         deletemodel.settlement_approved_by = oldmodel[0].settlement_approved_by;
+    //         deletemodel.settlement_approved_date = oldmodel[0].settlement_approved_date;
+    //         deletemodel.status = oldmodel[0].status;
     //         deletemodel.note = oldmodel[0].note;
+    //         deletemodel.reject_reason = oldmodel[0].reject_reason;
+
     //         deletemodel.is_delete = true;
     //         deletemodel.created_by = oldmodel[0].created_by;
     //         deletemodel.created_date = oldmodel[0].created_date;
@@ -199,23 +393,23 @@ const TSItemController = {
 
     //         var model = new tsitemModel(deletemodel);
 
-    //         global.dbo.collection('t_souvenir_item').findOneAndUpdate
+    //         global.dbo.collection('t_souvenir').findOneAndUpdate
     //         (
     //             {'_id' : ObjectID(id)},
     //             {$set: model},
     //             function(err, data){
     //                 if(err)
     //                 {
-    //                     logger.info("Transaction Item Souvenir : Delete Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+    //                     logger.info("Transaction Souvenir : Delete Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
     //                     logger.error(err);
     //                     return next(new Error());
     //                 }
-    //                 logger.info("Transaction Item Souvenir : Delete successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-    //                 logger.info({data : data}, "Transaction Item Souvenir : Delete content");
+    //                 logger.info("Transaction Souvenir : Delete successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+    //                 logger.info({data : data}, "Transaction Souvenir : Delete content");
     //                 Response.send(res, 200, data);
     //             }
     //         );
     //     });
     // }
 };
-module.exports = TSItemController;
+module.exports = TSController;
