@@ -34,12 +34,13 @@ const MSouvenirController = {
                     "name" : "$name",
                     "description" : "$description", 
                     "m_unit_id" : "$unit_lookup.name",
+                    "unit" : "$m_unit_id",
                     //"name_unit" : "$unit_lookup.name",
                     "is_delete" : "$is_delete",
                     "created_by" : "$created_by",
-                    "created_date" : "$created_date",
+                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
                     "updated_by" : "$updated_by",
-                    "updated_date" : "$updated_date"
+                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } }
                 }
             }	
         ]).toArray((err, data) => {
@@ -82,12 +83,13 @@ const MSouvenirController = {
                     "name" : "$name",
                     "description" : "$description", 
                     "m_unit_id" : "$unit_lookup.name",
+                    "unit" : "$m_unit_id",
                     //"name_unit" : "$unit_lookup.name",
                     "is_delete" : "$is_delete",
                     "created_by" : "$created_by",
-                    "created_date" : "$created_date",
+                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
                     "updated_by" : "$updated_by",
-                    "updated_date" : "$updated_date"
+                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } }
                 }
             }	
         ]).toArray((err, data) => {
@@ -103,6 +105,72 @@ const MSouvenirController = {
             Response.send(res, 200, data);
         });
     },
+    GetAllHandlerSearch : (req, res, next) => {
+        logger.info("Initialized Souvenir : GetAllHandlerSearch" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
+        let search = req.body;
+        console.log("Request");
+        console.log(search.filter);
+
+        var myMatch = {};
+        for (var i = 0; i < search.filter.length; i++) 
+        {
+            myMatch[search.filter[i].id] = search.filter[i].value;
+        }
+
+        console.log("My Match : ");
+        console.log(myMatch);
+
+
+        global.dbo.collection('m_souvenir').aggregate([
+            {
+                $lookup : {
+                from : "m_unit",
+                localField : "m_unit_id",
+                foreignField : "_id",
+                as : "unit_lookup"
+                }
+            },
+            {
+                $unwind : "$unit_lookup"  
+            },
+            {
+                $project:
+                {
+                    "_id" : "$_id", 
+                    "code" : "$code", 
+                    "name" : "$name",
+                    "description" : "$description", 
+                    "m_unit_id" : "$unit_lookup.name",
+                    "unit" : "$m_unit_id",
+                    "is_delete" : "$is_delete",
+                    "created_by" : "$created_by",
+                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
+                    "updated_by" : "$updated_by",
+                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } }
+                }
+            },
+            {
+                $match: {
+                    $and:
+                    [
+                        myMatch
+                    ]
+                }
+            }
+        ]).toArray((err, data) => {
+            if(err)
+            {
+                logger.info("Souvenir : GetAllHandlerSearch Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                logger.error(err);
+                return next(new Error());
+            }
+
+            logger.info("Souvenir : GetAllHandlerSearch successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            logger.info({data : data}, "Souvenir : GetAllHandlerSearch content");
+            Response.send(res, 200, data);
+        });
+    },
     Create : (req, res, next) => {
         logger.info("Initialized Souvenir : Create" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
         let reqdata = req.body;
@@ -113,7 +181,7 @@ const MSouvenirController = {
         data.description = reqdata.description;
         data.m_unit_id = ObjectID(reqdata.m_unit_id);
         data.is_delete = false;
-        data.created_by = "Administrator";
+        data.created_by = global.user.role;
         data.created_date = now;
         data.updated_by = null;
         data.updated_date = null;
@@ -198,7 +266,7 @@ const MSouvenirController = {
             updatemodel.is_delete = false;
             updatemodel.created_by = oldmodel[0].created_by;
             updatemodel.created_date = oldmodel[0].created_date;
-            updatemodel.updated_by = "Administrator";
+            updatemodel.updated_by = global.user.role;
             updatemodel.updated_date = now;
             
             var model = new msouvenirModel(updatemodel);
@@ -269,6 +337,60 @@ const MSouvenirController = {
                     Response.send(res, 200, data);
                 }
             );
+        });
+    },
+    GetAllHandlerSortByDescending : (req, res, next) => {
+        logger.info("Initialized Supplier : GetAllHandlerSortByDescending" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
+        global.dbo.collection('m_souvenir').aggregate([
+            {
+                $lookup : {
+                from : "m_unit",
+                localField : "m_unit_id",
+                foreignField : "_id",
+                as : "unit_lookup"
+                }
+            },
+            {
+                $unwind : "$unit_lookup"  
+            },
+            {
+                $match : {is_delete : false}
+            },
+            {
+                $project:
+                {
+                    "_id" : "$_id", 
+                    "code" : "$code", 
+                    "name" : "$name",
+                    "description" : "$description", 
+                    "m_unit_id" : "$unit_lookup.name",
+                    "m_unit_id" : "$unit_lookup._id",
+                    //"name_unit" : "$unit_lookup.name",
+                    "is_delete" : "$is_delete",
+                    "created_by" : "$created_by",
+                    "created_date" : "$created_date",
+                    "updated_by" : "$updated_by",
+                    "updated_date" : "$updated_date"
+                }
+            },
+            {
+              $sort:{"_id":-1}
+            },
+            { 
+              $limit : 1 
+            },
+        ]).toArray((err, data) => {
+            if(err)
+            {
+                logger.info("Souvenir : GetAllHandlerSortByDescending Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                logger.error(err);
+                return next(new Error());
+            }
+
+            logger.info("Souvenir : GetAllHandlerSortByDescending successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            logger.info({data : data}, "Souvenir : GetAllHandlerSortByDescending content");
+            Response.send(res, 200, data);
         });
     }
 };

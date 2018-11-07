@@ -8,8 +8,8 @@ var m_employee = require('../controllers/m_employee');
 var m_company = require('../controllers/m_company');
 var m_user = require('../controllers/m_user');
 const msouvenir = require('../controllers/m_souvenir');
-const tsitem = require('../controllers/t_souvenir_item');
 const tsouvenir = require('../controllers/t_souvenir');
+const munit = require('../controllers/m_unit');
 
 module.exports = exports = function(server){
 
@@ -38,18 +38,18 @@ module.exports = exports = function(server){
     server.del('/api/user/:id', Middleware.checkToken, m_user.Delete);
 
     //Route m_souvenir
-    server.get('/api/souvenir/', msouvenir.GetAll);
-    server.get('/api/souvenir/:id', msouvenir.GetDetail);
-    server.post('/api/souvenir/', msouvenir.Create);
-    server.put('/api/souvenir/:id', msouvenir.Update);
-    server.del('/api/souvenir/:id', msouvenir.Delete);
+    server.get('/api/souvenir/', Middleware.checkToken, msouvenir.GetAll);
+    server.get('/api/souvenir/:id', Middleware.checkToken, msouvenir.GetDetail);
+    server.post('/api/souvenir/', Middleware.checkToken, msouvenir.Create);
+    server.put('/api/souvenir/:id', Middleware.checkToken, msouvenir.Update);
+    server.del('/api/souvenir/:id', Middleware.checkToken, msouvenir.Delete);
+    server.get('/api/souvenir/orderdesc', msouvenir.GetAllHandlerSortByDescending);
+    server.post('/api/souvenir/search', Middleware.checkToken, msouvenir.GetAllHandlerSearch);
 
     //Route t_souvenir
-    server.get('/api/tsouvenir/', tsouvenir.GetAll);
-    server.get('/api/tsouvenir/:id', tsouvenir.GetDetail);
-    // server.post('/api/souvenir/', msouvenir.Create);
-    // server.put('/api/souvenir/:id', msouvenir.Update);
-    // server.del('/api/souvenir/:id', msouvenir.Delete);
+    server.get('/api/tsouvenir/', Middleware.checkToken, tsouvenir.GetAll);
+    server.get('/api/tsouvenir/:id', Middleware.checkToken, tsouvenir.GetDetail);
+    server.post('/api/tsouvenir/search', Middleware.checkToken, tsouvenir.GetAllHandlerSearch);
 
     //Route t_souvenir_item
     // server.get('/api/tsitem/', tsitem.GetAll);
@@ -67,4 +67,7 @@ module.exports = exports = function(server){
 
     //Route Company
     server.get('/api/company/', m_company.GetAll);
+
+    //Route Unit
+    server.get('/api/unit/',Middleware.checkToken, munit.GetAll);
 };
