@@ -7,15 +7,12 @@ const logger = require('../config/log');
 
 var m_employee = require('../controllers/m_employee');
 var m_company = require('../controllers/m_company');
-<<<<<<< HEAD
 var m_user = require('../controllers/m_user');
-=======
 var validasi = require('../controllers/validate');
 var t_event = require('../controllers/t_event');
 
 var user = require('../controllers/m_user');
 
->>>>>>> origin/lutfi
 const msouvenir = require('../controllers/m_souvenir');
 const tsitem = require('../controllers/t_souvenir_item');
 const tsouvenir = require('../controllers/t_souvenir');
