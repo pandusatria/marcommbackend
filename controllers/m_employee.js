@@ -263,6 +263,109 @@ const EmployeeController = {
                 }
             );
         });
+    },
+
+    GetNew : (req, res, next) => {
+        logger.info("Initializing Employee - getNew" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
+        global.dbo.collection('m_employee').aggregate([
+            {
+                $lookup :
+                {
+                    from : "m_user",
+                    localField : "_id",
+                    foreignField : "m_employee_id",
+                    as : "Show_User"
+                }
+            },
+            {
+                $unwind :
+                {
+                	path: "$Show_User",
+                	preserveNullAndEmptyArrays: true
+                } 
+            },
+            {
+            	$project :
+            	{
+            		_id : "$_id",
+            		employee_name : { $concat: [ "$first_name", " ", "$last_name" ] },
+            		username : { $ifNull: ["$Show_User.username", "Null"] },
+            		is_delete : "$is_delete"
+            	}
+            },
+            {
+                $match : 
+                { 
+                  is_delete : false,
+                  username : "Null"
+                }
+            }
+        ]).toArray((err, data) => {
+                if(err){
+                    logger.info("Employee - Get New Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'))
+                    logger.error(err)
+                    return next(new Error());
+                }
+
+                logger.info("Employee - Get New Successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'))
+                logger.info( { data, data} )
+                Response.send(res, 200, data);
+        });
+    },
+
+    GetNewEdit : (req, res, next) => {
+        logger.info("Initializing Employee - getNewEdit" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'))
+        
+        let id = req.params.id;
+
+        global.dbo.collection('m_employee').aggregate([
+            {
+                $lookup :
+                {
+                    from : "m_user",
+                    localField : "_id",
+                    foreignField : "m_employee_id",
+                    as : "Show_User"
+                }
+            },
+            {
+                $unwind :
+                {
+                	path: "$Show_User",
+                	preserveNullAndEmptyArrays: true
+                } 
+            },
+            {
+            	$project :
+            	{
+            		_id : "$_id",
+            		employee_name : { $concat: [ "$first_name", " ", "$last_name" ] },
+            		username : { $ifNull: ["$Show_User.username", "Null"] },
+            		is_delete : "$is_delete"
+            	}
+            },
+            {
+                $match: 
+                { 
+                  $or: 
+                    [
+                      { is_delete : false, username : "Null" }, 
+                      { is_delete : false, _id : ObjectID(id) }
+                    ] 
+                }
+            }
+        ]).toArray((error, data) => {
+            if(error) {
+                logger.info("Employee - Get New Edit Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'))
+                logger.error(err)
+                return next(new Error());
+            }
+
+            logger.info("Employee - Get New Edit Successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'))
+            logger.info( { data, data} )
+            Response.send(res, 200, data);
+        });
     }
 }
  

@@ -8,6 +8,7 @@ const logger = require('../config/log');
 var m_employee = require('../controllers/m_employee');
 var m_company = require('../controllers/m_company');
 var m_user = require('../controllers/m_user');
+<<<<<<< HEAD
 var validasi = require('../controllers/validate');
 var t_event = require('../controllers/t_event');
 
@@ -18,6 +19,14 @@ const tsitem = require('../controllers/t_souvenir_item');
 const tsouvenir = require('../controllers/t_souvenir');
 var t_sitem = require('../controllers/t_souvenir_item');
 
+=======
+var m_role = require('../controllers/m_role');
+var t_sitem = require('../controllers/t_souvenir_item');
+
+var validate = require('../controllers/validate');
+
+const msouvenir = require('../controllers/m_souvenir');
+>>>>>>> origin/zuhri
 
 module.exports = exports = function(server){
 
@@ -35,6 +44,10 @@ module.exports = exports = function(server){
     logger.info("Route already accessed" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
     // Set Route Path Here
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/zuhri
     // Route User
     server.post('/api/login', m_user.Login);
     server.get('/api/logout', m_user.Logout);
@@ -43,6 +56,10 @@ module.exports = exports = function(server){
     server.post('/api/user/', Middleware.checkToken, m_user.Create);
     server.put('/api/user/:id', Middleware.checkToken, m_user.Update);
     server.del('/api/user/:id', Middleware.checkToken, m_user.Delete);
+    server.post('/api/user/search', Middleware.checkToken, m_user.Search);
+
+    // Route Role
+    server.get('/api/role/', Middleware.checkToken, m_role.GetAll);
 
     //Route m_souvenir
     server.get('/api/souvenir/', msouvenir.GetAll);
@@ -66,15 +83,26 @@ module.exports = exports = function(server){
     server.del('/api/tsitem/:id', Middleware.checkToken, t_sitem.Delete);
 
     // Route Employee
+<<<<<<< HEAD
     server.get('/api/employee/', Middleware.checkToken, m_employee.GetAll);
     server.get('/api/employee/:id', Middleware.checkToken, m_employee.GetDetail);
     server.post('/api/employee/', Middleware.checkToken, m_employee.Create);
     server.put('/api/employee/:id', Middleware.checkToken, m_employee.Update);
     server.del('/api/employee/:id', Middleware.checkToken, m_employee.Delete);
+=======
+    server.get('/api/employee/', m_employee.GetAll);
+    server.get('/api/employee/:id', m_employee.GetDetail);
+    server.post('/api/employee/', m_employee.Create);
+    server.put('/api/employee/:id', m_employee.Update);
+    server.del('/api/employee/:id', m_employee.Delete);
+    server.get('/api/employee/new/', m_employee.GetNew);
+    server.get('/api/employee/newedit/:id', m_employee.GetNewEdit);
+>>>>>>> origin/zuhri
 
     //Route Company
     server.get('/api/company/', m_company.GetAll);
 
+<<<<<<< HEAD
     //Route validasi
     server.get('/api/validate/checkNumber/:employee_number', validasi.checkNumber);
 
@@ -86,4 +114,7 @@ module.exports = exports = function(server){
 
 
 
+=======
+    server.get('/api/validate/checkusername/:username', validate.checkUsername);
+>>>>>>> origin/zuhri
 };

@@ -22,6 +22,7 @@ const validate = {
                 }
             });
     },
+<<<<<<< HEAD
     checkEmployee : (req, res, next) => {
         var m_employee_id = req.params.id;
         console.log(m_employee_id)
@@ -39,6 +40,23 @@ const validate = {
                 Response.send(res, 200, "not exist")
             }
         })
+=======
+
+    checkUsername : (req, res, next) => {
+        var username = req.params.username;
+
+        global.dbo.collection('m_user').findOne({ username : username }, (err, data) => {
+            if(data) {
+                let doc = {
+                    message : "existing",
+                    content : { "_id" : ObjectID(data._id), "username" : data.username }
+                };
+                Response.send(res, 200, doc);
+            } else{
+                Response.send(res, 200, "not exist");
+            }
+        });
+>>>>>>> origin/zuhri
     }
 };
 
