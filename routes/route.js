@@ -8,9 +8,12 @@ const logger = require('../config/log');
 var m_employee = require('../controllers/m_employee');
 var m_company = require('../controllers/m_company');
 var m_user = require('../controllers/m_user');
+var m_role = require('../controllers/m_role');
+var t_sitem = require('../controllers/t_souvenir_item');
+
+var validate = require('../controllers/validate');
 
 const msouvenir = require('../controllers/m_souvenir');
-var t_sitem = require('../controllers/t_souvenir_item');
 
 module.exports = exports = function(server){
 
@@ -37,6 +40,10 @@ module.exports = exports = function(server){
     server.post('/api/user/', Middleware.checkToken, m_user.Create);
     server.put('/api/user/:id', Middleware.checkToken, m_user.Update);
     server.del('/api/user/:id', Middleware.checkToken, m_user.Delete);
+    server.post('/api/user/search', Middleware.checkToken, m_user.Search);
+
+    // Route Role
+    server.get('/api/role/', Middleware.checkToken, m_role.GetAll);
 
     //Route m_souvenir
     server.get('/api/souvenir/', msouvenir.GetAll);
@@ -58,8 +65,11 @@ module.exports = exports = function(server){
     server.post('/api/employee/', m_employee.Create);
     server.put('/api/employee/:id', m_employee.Update);
     server.del('/api/employee/:id', m_employee.Delete);
+    server.get('/api/employee/new/', m_employee.GetNew);
+    server.get('/api/employee/newedit/:id', m_employee.GetNewEdit);
 
     //Route Company
     server.get('/api/company/', m_company.GetAll);
 
+    server.get('/api/validate/checkusername/:username', validate.checkUsername);
 };

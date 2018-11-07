@@ -29,7 +29,7 @@ const userController = {
                     $match : 
                     { 
                         is_delete : false,
-                        username : username 
+                        username : username
                     }
                 },
                 {
@@ -62,13 +62,14 @@ const userController = {
                         username : "$username",
                         password : "$password",
                         role : "$Show_Role.name",
-                        employe : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                        employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                        m_employee_id : "$m_employee_id",
                         email : "$Show_Employee.email",
                         is_delete : "$is_delete",
                         created_by : "$created_by",
-                        created_date : "$created_date",
+                        created_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$created_date" } },
                         update_by : "$updated_by",
-                        update_date : "$updated_date"
+                        update_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$update_date" } }
                     }
                 }
            ]).toArray((error, data) => {
@@ -93,6 +94,9 @@ const userController = {
 
                         logger.info("Username : " + data.username + " Success Login at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
                         Response.send(res, 200, doc);
+                    } else {
+                        logger.info("Login Failed, password does not exist" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                        Response.send(res, 404, "Password wrong");
                     }
 
                 } else {
@@ -148,18 +152,33 @@ const userController = {
                 $unwind : "$Show_Employee"
             },
             {
+            	$lookup :
+            	{
+            		from : "m_company",
+                    localField : "Show_Employee.m_company_id",
+                    foreignField : "_id",
+                    as : "Show_Company"
+            	}
+            },
+            {
+            	$unwind : "$Show_Company"
+            },
+            {
                 $project :
                 {
                     username : "$username",
                     password : "$password",
                     role : "$Show_Role.name",
-                    employe : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                    m_role_id : "$m_role_id",
+                    m_employee_id : "$m_employee_id",
+                    employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
                     email : "$Show_Employee.email",
+                    company : "$Show_Company.name",
                     is_delete : "$is_delete",
                     created_by : "$created_by",
-                    created_date : "$created_date",
+                    created_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$created_date" } },
                     update_by : "$updated_by",
-                    update_date : "$updated_date"
+                    update_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$updated_date" } }
                 }
             }
         ]).toArray((error, data) => {
@@ -215,12 +234,12 @@ const userController = {
                     username : "$username",
                     password : "$password",
                     role : "$Show_Role.name",
-                    employe : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                    employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
                     is_delete : "$is_delete",
                     created_by : "$created_by",
-                    created_date : "$created_date",
+                    created_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$created_date" } },
                     update_by : "$updated_by",
-                    update_date : "$updated_date"
+                    update_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$updated_date" } }
                 }
             }
         ]).toArray((error, data) => {
@@ -245,7 +264,7 @@ const userController = {
         data.m_role_id      = ObjectID(reqdata.m_role_id);
         data.m_employee_id  = ObjectID(reqdata.m_employee_id);
         data.is_delete      = false;
-        data.created_by     = global.user.username;
+        data.created_by     = global.user.role;
         data.created_date   = now;
         data.updated_by     = null;
         data.updated_date   = null;
@@ -382,6 +401,98 @@ const userController = {
             );
 
         });
+    },
+
+    Search : (req, res, next) => {
+        logger.info("Initialized Master User : Search" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
+        let reqdata = req.body;
+
+        let match = {};
+
+        for(var i = 0; i < reqdata.filter.length; i++){
+            match[reqdata.filter[i].id] = reqdata.filter[i].value;
+        }
+
+        console.log("debuggg");
+        console.log(match);
+
+        global.dbo.collection('m_user').aggregate([
+            {
+                $lookup :
+                {
+                    from : "m_role",
+                    localField : "m_role_id",
+                    foreignField : "_id",
+                    as : "Show_Role"
+                }
+            },
+            {
+                $unwind : "$Show_Role"
+            },
+            {
+                $lookup :
+                {
+                    from : "m_employee",
+                    localField : "m_employee_id",
+                    foreignField : "_id",
+                    as : "Show_Employee"
+                }
+            },
+            {
+                $unwind : "$Show_Employee"
+            },
+            {
+            	$lookup :
+            	{
+            		from : "m_company",
+                    localField : "Show_Employee.m_company_id",
+                    foreignField : "_id",
+                    as : "Show_Company"
+            	}
+            },
+            {
+            	$unwind : "$Show_Company"
+            },
+            {
+                $project :
+                {
+                    username : "$username",
+                    password : "$password",
+                    role : "$Show_Role.name",
+                    m_role_id : "$m_role_id",
+                    m_employee_id : "$m_employee_id",
+                    employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                    email : "$Show_Employee.email",
+                    company : "$Show_Company.name",
+                    is_delete : "$is_delete",
+                    created_by : "$created_by",
+                    created_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$created_date" } },
+                    update_by : "$updated_by",
+                    update_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$updated_date" } }
+                }
+            },
+            {
+                $match : 
+                {
+                    $and:
+                    [
+                        match
+                    ]
+                }
+            }
+        ]).toArray((error, data) => {
+            if(error) {
+                logger.error(error);
+                return next(new Error());
+            }
+
+            logger.info("Showing Data User using search to " + global.user.username + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            Response.send(res, 200, data);   
+            console.log("try....")
+            console.log(data);
+        });
+
     }
 };
 
