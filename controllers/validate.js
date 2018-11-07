@@ -22,7 +22,6 @@ const validate = {
                 }
             });
     },
-<<<<<<< HEAD
     checkEmployee : (req, res, next) => {
         var m_employee_id = req.params.id;
         console.log(m_employee_id)
@@ -39,9 +38,8 @@ const validate = {
             }else{
                 Response.send(res, 200, "not exist")
             }
-        })
-=======
-
+		});
+	},
     checkUsername : (req, res, next) => {
         var username = req.params.username;
 
@@ -56,7 +54,6 @@ const validate = {
                 Response.send(res, 200, "not exist");
             }
         });
->>>>>>> origin/zuhri
     }
 };
 

@@ -64,10 +64,7 @@ const userController = {
                         password : "$password",
                         role : "$Show_Role.name",
                         employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
-<<<<<<< HEAD
-=======
                         m_employee_id : "$m_employee_id",
->>>>>>> origin/zuhri
                         email : "$Show_Employee.email",
                         is_delete : "$is_delete",
                         created_by : "$created_by",
@@ -174,12 +171,8 @@ const userController = {
                     password : "$password",
                     role : "$Show_Role.name",
                     m_role_id : "$m_role_id",
-<<<<<<< HEAD
-                    employe : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
-=======
                     m_employee_id : "$m_employee_id",
                     employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
->>>>>>> origin/zuhri
                     email : "$Show_Employee.email",
                     company : "$Show_Company.name",
                     is_delete : "$is_delete",
