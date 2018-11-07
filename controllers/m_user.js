@@ -11,6 +11,7 @@ const logger = require('../config/log');
 
 var now = new Date();
 
+
 const UserModel = require('../models/m_user.model');
 
 const userController = {
@@ -24,12 +25,20 @@ const userController = {
             logger.info("Login Failed, username / password is null" + " Try to Login at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
             Response.send(res, 404, "Username or Password is null");
         } else {
+<<<<<<< HEAD
            global.dbo.collection('m_user').aggregate([
+=======
+            global.dbo.collection('m_user').aggregate([
+>>>>>>> origin/lutfi
                 {
                     $match : 
                     { 
                         is_delete : false,
+<<<<<<< HEAD
                         username : username 
+=======
+                        username : username
+>>>>>>> origin/lutfi
                     }
                 },
                 {
@@ -62,7 +71,11 @@ const userController = {
                         username : "$username",
                         password : "$password",
                         role : "$Show_Role.name",
+<<<<<<< HEAD
                         employe : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+=======
+                        employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+>>>>>>> origin/lutfi
                         email : "$Show_Employee.email",
                         is_delete : "$is_delete",
                         created_by : "$created_by",
@@ -93,6 +106,9 @@ const userController = {
 
                         logger.info("Username : " + data.username + " Success Login at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
                         Response.send(res, 200, doc);
+                    } else {
+                        logger.info("Login Failed, password does not exist" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                        Response.send(res, 404, "Password wrong");
                     }
 
                 } else {
@@ -153,8 +169,13 @@ const userController = {
                     username : "$username",
                     password : "$password",
                     role : "$Show_Role.name",
+                    m_role_id : "$m_role_id",
                     employe : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
                     email : "$Show_Employee.email",
+<<<<<<< HEAD
+=======
+                    company : "$Show_Company.name",
+>>>>>>> origin/lutfi
                     is_delete : "$is_delete",
                     created_by : "$created_by",
                     created_date : "$created_date",
@@ -215,7 +236,7 @@ const userController = {
                     username : "$username",
                     password : "$password",
                     role : "$Show_Role.name",
-                    employe : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                    employee : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
                     is_delete : "$is_delete",
                     created_by : "$created_by",
                     created_date : "$created_date",
