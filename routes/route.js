@@ -10,7 +10,6 @@ var m_company = require('../controllers/m_company');
 var m_user = require('../controllers/m_user');
 var validasi = require('../controllers/validate');
 var t_event = require('../controllers/t_event');
-var user = require('../controllers/m_user');
 var msouvenir = require('../controllers/m_souvenir');
 var tsouvenir = require('../controllers/t_souvenir');
 var t_sitem = require('../controllers/t_souvenir_item');
