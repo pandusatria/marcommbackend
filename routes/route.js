@@ -8,6 +8,7 @@ const logger = require('../config/log');
 var m_employee = require('../controllers/m_employee');
 var m_company = require('../controllers/m_company');
 var m_user = require('../controllers/m_user');
+<<<<<<< HEAD
 var validasi = require('../controllers/validate');
 var t_event = require('../controllers/t_event');
 var user = require('../controllers/m_user');
@@ -15,6 +16,11 @@ var msouvenir = require('../controllers/m_souvenir');
 var tsouvenir = require('../controllers/t_souvenir');
 var t_sitem = require('../controllers/t_souvenir_item');
 var m_role = require('../controllers/m_role');
+=======
+const msouvenir = require('../controllers/m_souvenir');
+const tsouvenir = require('../controllers/t_souvenir');
+const munit = require('../controllers/m_unit');
+>>>>>>> origin/viyankawr
 
 module.exports = exports = function(server){
 
@@ -47,15 +53,23 @@ module.exports = exports = function(server){
     server.get('/api/role/', Middleware.checkToken, m_role.GetAll);
 
     //Route m_souvenir
-    server.get('/api/souvenir/', msouvenir.GetAll);
-    server.get('/api/souvenir/:id', msouvenir.GetDetail);
-    server.post('/api/souvenir/', msouvenir.Create);
-    server.put('/api/souvenir/:id', msouvenir.Update);
-    server.del('/api/souvenir/:id', msouvenir.Delete);
+    server.get('/api/souvenir/', Middleware.checkToken, msouvenir.GetAll);
+    server.get('/api/souvenir/:id', Middleware.checkToken, msouvenir.GetDetail);
+    server.post('/api/souvenir/', Middleware.checkToken, msouvenir.Create);
+    server.put('/api/souvenir/:id', Middleware.checkToken, msouvenir.Update);
+    server.del('/api/souvenir/:id', Middleware.checkToken, msouvenir.Delete);
+    server.get('/api/souvenir/orderdesc', msouvenir.GetAllHandlerSortByDescending);
+    server.post('/api/souvenir/search', Middleware.checkToken, msouvenir.GetAllHandlerSearch);
 
     //Route t_souvenir
+<<<<<<< HEAD
     server.get('/api/tsouvenir/', tsouvenir.GetAll);
     server.get('/api/tsouvenir/:id', tsouvenir.GetDetail);
+=======
+    server.get('/api/tsouvenir/', Middleware.checkToken, tsouvenir.GetAll);
+    server.get('/api/tsouvenir/:id', Middleware.checkToken, tsouvenir.GetDetail);
+    server.post('/api/tsouvenir/search', Middleware.checkToken, tsouvenir.GetAllHandlerSearch);
+>>>>>>> origin/viyankawr
 
     //Route t_souvenir_item
     server.get('/api/tsitem/', Middleware.checkToken, t_sitem.GetAll);
@@ -77,6 +91,7 @@ module.exports = exports = function(server){
     //Route Company
     server.get('/api/company/', m_company.GetAll);
 
+<<<<<<< HEAD
     //Route validasi
     server.get('/api/validate/checkNumber/:employee_number', validasi.checkNumber);
 
@@ -87,4 +102,8 @@ module.exports = exports = function(server){
     server.get('/api/event/', Middleware.checkToken, t_event.GetAll);
 
     server.get('/api/validate/checkusername/:username', validasi.checkUsername);
+=======
+    //Route Unit
+    server.get('/api/unit/',Middleware.checkToken, munit.GetAll);
+>>>>>>> origin/viyankawr
 };
