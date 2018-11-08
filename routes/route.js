@@ -89,9 +89,15 @@ module.exports = exports = function(server){
 
     //Route t_vent
     server.get('/api/event/', Middleware.checkToken, t_event.GetAll);
+    server.post('/api/event/', Middleware.checkToken, t_event.Create);
+
 
     server.get('/api/validate/checkusername/:username', Middleware.checkToken, validasi.checkUsername);
 	
     //Route Unit
     server.get('/api/unit/',Middleware.checkToken, munit.GetAll);
+
+
+    server.get('/api/event/orderdesc', t_event.GetAllHandlerSortByDescending )
+
 };
