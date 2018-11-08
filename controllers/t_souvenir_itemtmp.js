@@ -15,32 +15,47 @@ const TSItemController = {
 
         global.dbo.collection('t_souvenir_item').aggregate([
             {
-                $match : { is_delete : false }
+                $match : { is_delete : false}
             },
             {
                 $lookup : 
                 {
-                    from : "m_employee",
-                    localField : "request_by",
+                    from : "m_souvenir",
+                    localField : "m_souvenir_id",
                     foreignField : "_id",
-                    as : "Show_Employee"
+                    as : "Show_MSouvenir"
                 }
             },
             {
-                $unwind : "$Show_Employee"
+                $unwind : "$Show_MSouvenir"  
             },
             {
-                $project :
+                $lookup : 
                 {
-                    transaction_code : "$Show_Employee.code",
-                    request_by : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
-                    request_date : { "$dateToString": { "format": "%d/%m/%Y", "date": "$created_date"} },
-                    due_date : { "$dateToString": {"format": "%d%m/%Y", "date": "$request_due_date"} },
-                    status : "$status",
-                    created_date : { "$dateToString": {"format": "%d%m/%Y", "date": "$created_date"} },
-                    created_by : "$created_by"
+                    from : "t_souvenir",
+                    localField : "t_souvenir_id",
+                    foreignField : "_id",
+                    as : "Show_TSouvenir"
                 }
-            }
+            },
+            {
+                $unwind : "$Show_TSouvenir"  
+            },
+            {
+                $project:
+                {
+                    t_souvenir_id : "$Show_TSouvenir._id", 
+                    m_souvenir_id : "$Show_MSouvenir._id",
+                    qty : "$qty", 
+                    qty_settlement : "$qty_settlement",
+                    note : "$note",
+                    is_delete : "$is_delete",
+                    created_by : "$created_by",
+                    created_date : "$created_date",
+                    updated_by : "$updated_by",
+                    updated_date : "$updated_date"    
+                }
+            }	
         ]).toArray((error, data) => {
             if(error) {
                 logger.error(error);
