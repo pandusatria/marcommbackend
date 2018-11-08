@@ -7,9 +7,6 @@ const validate = {
     checkNumber : (req, res, next) => {
         var employee_number = req.params.employee_number;
 
-        // if(nama_client == null){
-        //     Response.send(res, 403, "You are not authorized");
-        // }else{
             global.dbo.collection('m_employee').findOne({ employee_number : employee_number}, (err, data) => {
                 if(data){
                     let doc = {

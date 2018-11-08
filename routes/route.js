@@ -74,22 +74,22 @@ module.exports = exports = function(server){
     server.put('/api/employee/:id', Middleware.checkToken, m_employee.Update);
     server.del('/api/employee/:id', Middleware.checkToken, m_employee.Delete);
 
-    server.get('/api/employee/new/', m_employee.GetNew);
-    server.get('/api/employee/newedit/:id', m_employee.GetNewEdit);
+    server.get('/api/employee/new/',Middleware.checkToken,  m_employee.GetNew);
+    server.get('/api/employee/newedit/:id', Middleware.checkToken, m_employee.GetNewEdit);
 
     //Route Company
-    server.get('/api/company/', m_company.GetAll);
+    server.get('/api/company/', Middleware.checkToken, m_company.GetAll);
 
     //Route validasi
-    server.get('/api/validate/checkNumber/:employee_number', validasi.checkNumber);
+    server.get('/api/validate/checkNumber/:employee_number', Middleware.checkToken, validasi.checkNumber);
 
     //Route Employee in User
-    server.get('/api/validate/checkEmployee/:id', validasi.checkEmployee);
+    server.get('/api/validate/checkEmployee/:id', Middleware.checkToken, validasi.checkEmployee);
 
     //Route t_vent
     server.get('/api/event/', Middleware.checkToken, t_event.GetAll);
 
-    server.get('/api/validate/checkusername/:username', validasi.checkUsername);
+    server.get('/api/validate/checkusername/:username', Middleware.checkToken, validasi.checkUsername);
 	
     //Route Unit
     server.get('/api/unit/',Middleware.checkToken, munit.GetAll);
