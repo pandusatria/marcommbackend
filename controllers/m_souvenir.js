@@ -369,9 +369,9 @@ const MSouvenirController = {
                     //"name_unit" : "$unit_lookup.name",
                     "is_delete" : "$is_delete",
                     "created_by" : "$created_by",
-                    "created_date" : "$created_date",
+                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
                     "updated_by" : "$updated_by",
-                    "updated_date" : "$updated_date"
+                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } }
                 }
             },
             {
