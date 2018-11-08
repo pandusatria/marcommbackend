@@ -66,6 +66,7 @@ module.exports = exports = function(server){
     server.post('/api/tsitem/', Middleware.checkToken, t_sitem.Create);
     server.put('/api/tsitem/:id', Middleware.checkToken, t_sitem.Update);
     server.del('/api/tsitem/:id', Middleware.checkToken, t_sitem.Delete);
+    server.post('/api/tsitem/search', Middleware.checkToken, t_sitem.Search);
 
     // Route Employee
     server.get('/api/employee/', Middleware.checkToken, m_employee.GetAll);
