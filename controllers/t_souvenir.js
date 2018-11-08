@@ -48,7 +48,7 @@ const TSController = {
                     
                     "received_by" : "$employee_lkup._id", 
                     "name_receiver" : { $concat: [ "$employee_lkup.first_name", " ", "$employee_lkup.last_name"] },
-                    "received_date" : "$received_date",
+                    "received_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$received_date" } },
                     "note" : "$note",
                     
                     
@@ -73,7 +73,7 @@ const TSController = {
         });
     },
     GetDetail : (req, res, next) => {
-        logger.info("Initialized Transaction Item Souvenir  : GetDetail" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+        logger.info("Initialized Transaction Souvenir  : GetDetail" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
         let id = req.params.id;
         
@@ -114,7 +114,7 @@ const TSController = {
                     
                     "received_by" : "$received_by", 
                     "name_receiver" : { $concat: [ "$employee_lkup.first_name", " ", "$employee_lkup.last_name"] },
-                    "received_date" : "$received_date",
+                    "received_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$received_date" } },
                     "note" : "$note",
                     
                     
@@ -189,7 +189,7 @@ const TSController = {
                     
                     "received_by" : "$received_by", 
                     "name_receiver" : { $concat: [ "$employee_lkup.first_name", " ", "$employee_lkup.last_name"] },
-                    "received_date" : "$received_date",
+                    "received_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$received_date" } },
                     "note" : "$note",
                     
                     
@@ -221,37 +221,119 @@ const TSController = {
             Response.send(res, 200, data);
         });
     },
-    // Create : (req, res, next) => {
-    //     logger.info("Initialized Transaction Item Souvenir : Create" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-    //     let reqdata = req.body;
-    //     var data = {};
+    GetAllHandlerSortByDescending : (req, res, next) => {
+        logger.info("Initialized Supplier : GetAllHandlerSortByDescending" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
-    //     data.t_souvenir_id = ObjectID(reqdata.t_souvenir_id);
-    //     data.m_souvenir_id = ObjectID(reqdata.m_souvenir_id);
-    //     data.qty = reqdata.qty;
-    //     data.qty_settlement = reqdata.qty_settlement;
-    //     data.note = reqdata.note;
-    //     data.is_delete = false;
-    //     data.created_by = reqdata.created_by;
-    //     data.created_date = now;
-    //     data.updated_by = null;
-    //     data.updated_date = null;
+        global.dbo.collection('t_souvenir').aggregate([
+            {
+                $lookup : {
+                from : "m_employee",
+                localField : "received_by",
+                foreignField : "_id",
+                as : "employee_lkup"
+                }
+            },
+            {
+                $unwind : "$employee_lkup"  
+            },
+            {
+                $lookup : {
+                from : "t_event",
+                localField : "t_event_id",
+                foreignField : "_id",
+                as : "tevent_lkup"
+                }
+            },
+            {
+                $unwind : "$tevent_lkup"  
+            },
+            {
+                $match : { is_delete : false}
+            },
+            {
+                $project:
+                {
+                    "_id" : "$_id", 
+                    "code" : "$code", 
+                    "type" : "$type",
+                    "t_event_id" : "$t_event_id",
+                    "status_event" : "$tevent_lkup.status", 
+                    
+                    "received_by" : "$received_by", 
+                    "name_receiver" : { $concat: [ "$employee_lkup.first_name", " ", "$employee_lkup.last_name"] },
+                    "received_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$received_date" } },
+                    "note" : "$note",
+                    
+                    
+                    "is_delete" : "$is_delete",
+                    "created_by" : "$created_by",
+                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
+                    "updated_by" : "$updated_by",
+                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } }   
+                }
+            },	
+            {
+              $sort:{"_id":-1}
+            },
+            { 
+              $limit : 1 
+            },
+        ]).toArray((err, data) => {
+            if(err)
+            {
+                logger.info("Souvenir : GetAllHandlerSortByDescending Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                logger.error(err);
+                return next(new Error());
+            }
+
+            logger.info("Souvenir : GetAllHandlerSortByDescending successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            logger.info({data : data}, "Souvenir : GetAllHandlerSortByDescending content");
+            Response.send(res, 200, data);
+        });
+    },
+    Create : (req, res, next) => {
+        logger.info("Initialized Transaction Souvenir : Create" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+        let reqdata = req.body;
+        var data = {};
+
+        data.code = reqdata.code;
+        data.type = reqdata.type;
+        data.t_event_id = ObjectID(reqdata.t_event_id);
+        data.request_by = ObjectID(reqdata.request_by);
+        data.request_date = null;
+        data.request_date = null;
+        data.approved_by = ObjectID(reqdata.approved_by);
+        data.approved_date = null;
+        data.received_by = ObjectID(reqdata.received_by);
+        data.received_date = null;
+        data.settlement_by = ObjectID(reqdata.settlement_by);
+        data.settlement_date = null;
+        data.settlement_approved_by = ObjectID(reqdata.settlement_approved_by);
+        data.settlement_approved_date = null;
+        data.status = reqdata.status;
+        data.note = reqdata.note;
+        data.reject_reason = reqdata.reject_reason;
+        data.is_delete = false;
+        data.created_by = reqdata.created_by;
+        data.created_date = now;
+        data.updated_by = null;
+        data.updated_date = null;
         
         
-    //     var model = new tsitemModel(data);
+        var model = new tsouvenirModel(data);
 
-    //     global.dbo.collection('t_souvenir_item').insertOne(model, function(err, data){
-    //         if(err)
-    //         {
-    //             logger.info("Transaction Item Souvenir : Create Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-    //             logger.error(err);
-    //             return next(new Error());
-    //         }
-    //         logger.info("Transaction Item Souvenir : Create successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
-    //         logger.info({data : data}, "Transaction Item Souvenir : Create content");
-    //         Response.send(res, 200, data);
-    //     });
-    // },
+        global.dbo.collection('t_souvenir').insertOne(model, function(err, data){
+            if(err)
+            {
+                logger.info("Transaction Souvenir : Create Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                logger.error(err);
+                return next(new Error());
+            }
+            logger.info("Transaction Souvenir : Create successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            logger.info({data : data}, "Transaction Item Souvenir : Create content");
+            Response.send(res, 200, data);
+        });
+    },
     // Update : (req, res, next) => {
     //     logger.info("Initialized Transaction Item Souvenir : Update" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
