@@ -11,64 +11,61 @@ var now = new Date();
 
 const TSItemController = {
     GetAll : (req, res, next) => {
-        logger.info("Initialized Transaction Item Souvenir : GetAll" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+        logger.info("Initialized Transaction Request Souvenir : GetAll" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
-        global.dbo.collection('t_souvenir_item').aggregate([
+        global.dbo.collection('t_souvenir').aggregate([
             {
-                $match : { is_delete : false}
+               $match : { is_delete : false}
             },
             {
-                $lookup : 
+                $lookup :
                 {
-                    from : "m_souvenir",
-                    localField : "m_souvenir_id",
+                    from : "m_user",
+                    localField : "request_by",
                     foreignField : "_id",
-                    as : "Show_MSouvenir"
+                    as : "Show_User"
                 }
             },
             {
-                $unwind : "$Show_MSouvenir"  
+                $unwind : "$Show_User"
             },
             {
-                $lookup : 
+                $lookup :
                 {
-                    from : "t_souvenir",
-                    localField : "t_souvenir_id",
+                    from : "m_employee",
+                    localField : "Show_User.m_employee_id",
                     foreignField : "_id",
-                    as : "Show_TSouvenir"
+                    as : "Show_Employee"
                 }
             },
             {
-                $unwind : "$Show_TSouvenir"  
+                $unwind : "$Show_Employee"
             },
             {
-                $project:
+                $project :
                 {
-                    t_souvenir_id : "$Show_TSouvenir._id", 
-                    m_souvenir_id : "$Show_MSouvenir._id",
-                    qty : "$qty", 
-                    qty_settlement : "$qty_settlement",
-                    note : "$note",
-                    is_delete : "$is_delete",
-                    created_by : "$created_by",
-                    created_date : "$created_date",
-                    updated_by : "$updated_by",
-                    updated_date : "$updated_date"    
+                    transaction_code : "$code",
+                    request_by : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                    request_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$request_date" } },
+                    due_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$request_due_date" } },
+                    status : "$status",
+                    created_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$created_date" } },
+                    created_by : "$created_by"
                 }
-            }	
+            }
         ]).toArray((error, data) => {
             if(error) {
                 logger.error(error);
                 return next(new Error());
             }
 
-            logger.info("Showing all Data Transaction Item Souvenir " + global.user.username + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            logger.info("Showing all Data Transaction Request Souvenir " + global.user.username + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
             Response.send(res, 200, data);
         });
     },
 
     GetDetail : (req, res, next) => {
-        logger.info("Initialized Transaction Item Souvenir  : GetDetail" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+        logger.info("Initialized Transaction Request Souvenir  : GetDetail" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
         let id = req.params.id;
         
         global.dbo.collection('t_souvenir_item').aggregate([
@@ -125,13 +122,13 @@ const TSItemController = {
                 return next(new Error());
             }
 
-            logger.info("Showing Detail Data Transaction Item Souvenir " + global.user.username + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            logger.info("Showing Detail Data Transaction Request Souvenir " + global.user.username + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
             Response.send(res, 200, data);
         });
     },
 
     Create : (req, res, next) => {
-        logger.info("Initialized Transaction Item Souvenir : Create" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+        logger.info("Initialized Transaction Request Souvenir : Create" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
         
         let reqdata = req.body;
         var data = {};
@@ -156,7 +153,7 @@ const TSItemController = {
                 return next(new Error());
             }
 
-            logger.info("User " + global.user.username + " Create Data Transaction Item Souvenir at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            logger.info("User " + global.user.username + " Create Data Transaction Request Souvenir at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
             Response.send(res, 200, data);
         });
     },
@@ -232,7 +229,7 @@ const TSItemController = {
                         return next(new Error());
                     }
 
-                    logger.info("User " + global.user.username + " Update Data Transaction Item Souvenir at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                    logger.info("User " + global.user.username + " Update Data Transaction Request Souvenir at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
                     Response.send(res, 200, data);
                 }
             );
@@ -281,11 +278,86 @@ const TSItemController = {
                         return next(new Error());
                     }
 
-                    logger.info("User " + global.user.username + " Delete Data Transaction Item Souvenir at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                    logger.info("User " + global.user.username + " Delete Data Transaction Request Souvenir at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
                     Response.send(res, 200, data);
                 }
             );
         });
+    },
+
+    Search : (req, res, next) => {
+        logger.info("Initialized Transaction Request Souvenir : Search" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
+        let reqdata = req.body;
+
+        let match = {};
+
+        for(var i = 0; i < reqdata.filter.length; i++){
+            match[reqdata.filter[i].id] = reqdata.filter[i].value;
+        }
+
+        console.log("debuggg");
+        console.log(match);
+
+        global.dbo.collection('t_souvenir').aggregate([
+            {
+                $lookup :
+                {
+                    from : "m_user",
+                    localField : "request_by",
+                    foreignField : "_id",
+                    as : "Show_User"
+                }
+            },
+            {
+                $unwind : "$Show_User"
+            },
+            {
+                $lookup :
+                {
+                    from : "m_employee",
+                    localField : "Show_User.m_employee_id",
+                    foreignField : "_id",
+                    as : "Show_Employee"
+                }
+            },
+            {
+                $unwind : "$Show_Employee"
+            },
+            {
+                $project :
+                {
+                    transaction_code : "$code",
+                    request_by : { $concat: [ "$Show_Employee.first_name", " ", "$Show_Employee.last_name" ] },
+                    request_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$request_date" } },
+                    due_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$request_due_date" } },
+                    status : "$status",
+                    created_date : { "$dateToString": { "format": "%d-%m-%Y", "date": "$created_date" } },
+                    created_by : "$created_by",
+                    is_delete : "$is_delete"
+                }
+            },
+            {
+                $match : 
+                {
+                    $and:
+                    [
+                        match
+                    ]
+                }
+            }
+        ]).toArray((error, data) => {
+            if(error) {
+                logger.error(error);
+                return next(new Error());
+            }
+
+            logger.info("Showing Data User using search to " + global.user.username + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            Response.send(res, 200, data);   
+            console.log("try....")
+            console.log(data);
+        });
+
     }
 };
 module.exports = TSItemController;
