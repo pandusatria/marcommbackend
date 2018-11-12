@@ -314,7 +314,7 @@ const TSController = {
         data.note = reqdata.note;
         data.reject_reason = reqdata.reject_reason;
         data.is_delete = false;
-        data.created_by = reqdata.created_by;
+        data.created_by = global.user.role;
         data.created_date = now;
         data.updated_by = null;
         data.updated_date = null;
@@ -332,6 +332,188 @@ const TSController = {
             logger.info("Transaction Souvenir : Create successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
             logger.info({data : data}, "Transaction Item Souvenir : Create content");
             Response.send(res, 200, data);
+        });
+    },
+    GetSouvenirItem : (req, res, next) => {
+        logger.info("Initialized Souvenir : GetSouvenirItem" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+        let id = req.params.id;
+
+        global.dbo.collection('t_souvenir').aggregate([
+            {
+                $lookup:
+                {
+                    from: 't_souvenir_item',
+                    localField: '_id',
+                    foreignField: 't_souvenir_id',
+                    as: 'souvenir'
+                }
+            },
+            {
+                $match:
+                {
+                    "is_delete": false,
+                    "_id" : ObjectID(id)
+                }
+            },
+            {
+                  $project:
+                  {
+                    "_id" : "$_id", 
+                    "code" : "$code", 
+                    "type" : "$type",
+                    "t_event_id" : "$t_event_id",
+                    "status_event" : "$tevent_lkup.status", 
+                    
+                    "received_by" : "$received_by", 
+                    "name_receiver" : { $concat: [ "$employee_lkup.first_name", " ", "$employee_lkup.last_name"] },
+                    "received_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$received_date" } },
+                    "note" : "$note",
+                    
+                    
+                    "is_delete" : "$is_delete",
+                    "created_by" : "$created_by",
+                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
+                    "updated_by" : "$updated_by",
+                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } },
+                    "DetailSouvenir" : "$souvenir"
+                }
+            }
+        ]).toArray((err, data) => {
+            if(err)
+            {
+                logger.info("Souvenir : GetSouvenirItem Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                logger.error(err);
+                return next(new Error());
+            }
+
+            logger.info("Souvenir : GetSouvenirItem successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            logger.info({data : data}, "Souvenir : GetSouvenirItem content");
+            Response.send(res, 200, data);
+        });
+    },
+    CreateTSouvenir : (req, res, next) => {
+        let id = req.params.id;
+        let reqdata = req.body;
+        var data = {};
+        var ListSouvenir = [];
+        var oldmodel = {};
+
+        console.log("ID Souvenir : ");
+        console.log(id);
+
+        ListSouvenir = reqdata.DetailSouvenir;
+
+        console.log("List Souvenir : ");
+        console.log(ListSouvenir);
+
+        global.dbo.collection('t_souvenir').find({is_delete : false, '_id' : ObjectID(id)}).toArray((err, data) => {
+            if(err)
+            {
+                return next(new Error());
+            }
+
+            oldmodel = data.map((entity) => {
+                return new tsouvenirModel(entity);
+            });
+
+            console.log("Old Model : ");
+            console.log(oldmodel);
+
+            data._id = ObjectID(id);
+
+            data.code = reqdata.code;
+            data.type = reqdata.type;
+            data.t_event_id = ObjectID(reqdata.t_event_id);
+            data.request_by = ObjectID(reqdata.request_by);
+            data.request_date = null;
+            data.request_date = null;
+            data.approved_by = ObjectID(reqdata.approved_by);
+            data.approved_date = null;
+            data.received_by = ObjectID(reqdata.received_by);
+            data.received_date = null;
+            data.settlement_by = ObjectID(reqdata.settlement_by);
+            data.settlement_date = null;
+            data.settlement_approved_by = ObjectID(reqdata.settlement_approved_by);
+            data.settlement_approved_date = null;
+            data.status = reqdata.status;
+            data.note = reqdata.note;
+            data.reject_reason = reqdata.reject_reason;
+            data.is_delete = false;
+            data.created_by = global.user.role;
+            data.created_date = now;
+            data.updated_by = null;
+            data.updated_date = null;
+
+            console.log("Create Model : ");
+            console.log(data);
+
+            var model = new tsouvenirModel(data);
+
+            console.log("Model : ");
+            console.log(model);
+
+            // First Create Souvenir Stock
+            console.log("First : Create Souvenir Stock");
+            global.dbo.collection('t_souvenir').insertOne
+            (
+                {'_id' : ObjectID(id)},
+                {$set: model},
+                function(err, data){
+                    if(err)
+                    {
+                        return next(new Error());
+                    }
+
+                    // Second Delete Detail Souvenir By Souvenir Item
+                    console.log("Second : Delete Detail Souvenir By Souvenir Item");
+                    global.dbo.collection('t_souvenir_item').deleteMany
+                    (
+                        {'t_souvenir' : ObjectID(id)},
+                        function(err, data){
+                            if(err)
+                            {
+                                return next(new Error());
+                            }
+
+                            // Third Insert All Souvenir from List Souvenir
+                            var ListSouvenirModel = [];
+
+                            console.log("List Souvenir to Mapping");
+                            console.log(ListSouvenir);
+
+                            for (var counter=0; counter < ListSouvenir.length; counter++){
+                                    var modelInsert = {};
+
+                                    modelInsert.name            =   ListSouvenir[counter].name;
+                                    modelInsert.t_souvenir_id   =   ObjectID(id);
+                                    modelInsert.qty             =   ListSouvenir[counter].qty;
+                                    modelInsert.note            =   ListSouvenir[counter].note;
+
+                                    modelInsert.is_delete       =   false;
+                                    modelInsert.created_date    =   now;
+                                    modelInsert.created_date    =   global.user.role;
+                                    modelInsert.updated_date    =   null;
+                                    modelInsert.updated_by      =   null;
+
+                                    var model = new tsitemModel(modelInsert);
+                                    ListSouvenirModel.push(model);
+                            }
+
+                            console.log("List Model to Add in Database");
+                            console.log(ListSouvenirModel);
+
+                            global.dbo.collection('t_souvenir_item').insertMany(ListSouvenirModel, function(err, data){
+                                if(err)
+                                {
+                                    return next(new Error());
+                                }
+
+                                Response.send(res, 200, data);
+                            });
+                        }
+                    );
+                }
+            );
         });
     },
     // Update : (req, res, next) => {

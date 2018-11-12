@@ -60,7 +60,10 @@ module.exports = exports = function(server){
     server.get('/api/tsouvenir/:id', Middleware.checkToken, tsouvenir.GetDetail);
     server.post('/api/tsouvenir/search', Middleware.checkToken, tsouvenir.GetAllHandlerSearch);
     server.get('/api/tsouvenir/orderdesc', tsouvenir.GetAllHandlerSortByDescending);
-    server.post('/api/tsouvenir/', Middleware.checkToken, tsouvenir.Create);
+    //server.post('/api/tsouvenir/', Middleware.checkToken, tsouvenir.Create);
+    server.get('/api/tsouvenir/getsouveniritem/:id', Middleware.checkToken, tsouvenir.GetSouvenirItem);
+
+    server.post('/api/tsouvenir/', Middleware.checkToken, tsouvenir.CreateTSouvenir);
 
     //Route t_souvenir_item
     server.get('/api/tsitem/', Middleware.checkToken, t_sitem.GetAll);
