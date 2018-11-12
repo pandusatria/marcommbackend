@@ -6,6 +6,7 @@ function model (entity)
     this.code           =   entity.code;
     this.name           =   entity.name;
     this.description    =   entity.description;
+    this.quantity       =   entity.quantity;
     this.m_unit_id      =   entity.m_unit_id;
     this.is_delete      =   entity.is_delete;
     this.created_by     =   entity.created_by;
@@ -20,7 +21,8 @@ model.prototype.getData = function()
         _id             : this._id,
         code            : this.code,
         name            : this.name,
-		description     : this.description,
+        description     : this.description,
+        quantity        : this.quantity,
 		m_unit_id       : this.m_unit_id,
 		is_delete       : this.is_delete,
         created_by      : this.created_by,
