@@ -366,6 +366,62 @@ const EmployeeController = {
             logger.info( { data, data} )
             Response.send(res, 200, data);
         });
+    },
+    GetEmployeeStaff : (req, res, next) => {
+        logger.info("Initializing Employee - get Employee which Role is Staff" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'))
+        global.dbo.collection('m_employee').aggregate([
+            {
+                $lookup:
+                    {
+                        from : "m_user",
+                        localField : "_id",
+                        foreignField : "m_employee_id",
+                        as : "user_lookup"
+                    }
+            },
+            {
+                $unwind : "$user_lookup"
+            },
+            {
+                $lookup:
+                    {
+                        from : "m_role",
+                        localField : "user_lookup.m_role_id",
+                        foreignField : "_id",
+                        as : "role_lookup"
+                    }
+            },
+            {
+                $unwind : "$role_lookup"
+            },
+            {
+                $match : 
+                    { 	
+                        "is_delete" : false,
+                        "user_lookup.m_role_id" : ObjectID("5bdb237ce0ec449e62ebdba7") 
+                    } 
+            },
+            {
+                $project:
+                    {
+                        "employee_number" : "$employee_number",
+                        "employee_name" : { $concat: [ "$first_name", " ", "$last_name" ] },
+                        "m_employee_id" : "$user_lookup.m_employee_id",
+                        "m_role_id" : "$user_lookup.m_role_id",
+                        "role" : "$role_lookup.name",
+                        _id :1
+                    }
+            }
+            ]).toArray((err, data) => {
+                if(err){
+                    logger.info("Employee - get Employee which Role is Staff Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'))
+                    logger.error(err)
+                    return next(new Error());
+                }
+                    logger.info("Employee - get Employee which Role is Staff Successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'))
+                    logger.info( { data, data} )
+                    Response.send(res, 200, data);
+            });
     }
 }
  
