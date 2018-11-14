@@ -33,7 +33,6 @@ const MSouvenirController = {
                     "code" : "$code", 
                     "name" : "$name",
                     "description" : "$description", 
-                    "quantity" : "$quantity",
                     "name_unit" : "$unit_lookup.name",
                     "m_unit_id" : "$m_unit_id",
                     //"name_unit" : "$unit_lookup.name",
@@ -83,7 +82,6 @@ const MSouvenirController = {
                     "code" : "$code", 
                     "name" : "$name",
                     "description" : "$description", 
-                    "quantity" : "$quantity",
                     "name_unit" : "$unit_lookup.name",
                     "m_unit_id" : "$m_unit_id",
                     //"name_unit" : "$unit_lookup.name",
@@ -143,7 +141,6 @@ const MSouvenirController = {
                     "code" : "$code", 
                     "name" : "$name",
                     "description" : "$description", 
-                    "quantity" : "$quantity",
                     "name_unit" : "$unit_lookup.name",
                     "m_unit_id" : "$m_unit_id",
                     "is_delete" : "$is_delete",
@@ -182,7 +179,6 @@ const MSouvenirController = {
         data.code = reqdata.code;
         data.name = reqdata.name;
         data.description = reqdata.description;
-        data.quantity = reqdata.quantity;
         data.m_unit_id = ObjectID(reqdata.m_unit_id);
         data.is_delete = false;
         data.created_by = global.user.role;
@@ -258,15 +254,6 @@ const MSouvenirController = {
                 updatemodel.description = reqdata.description;   
             }
 
-            if(reqdata.quantity == null || reqdata.quantity == undefined || reqdata.quantity == "")
-            {
-                updatemodel.quantity = oldmodel[0].quantity;
-            }
-            else
-            {
-                updatemodel.quantity = reqdata.quantity;   
-            }
-
             if(reqdata.m_unit_id == null || reqdata.m_unit_id == undefined || reqdata.m_unit_id == "")
             {
                 updatemodel.m_unit_id = oldmodel[0].m_unit_id;
@@ -325,7 +312,6 @@ const MSouvenirController = {
             deletemodel.code = oldmodel[0].code;
             deletemodel.name = oldmodel[0].name;
             deletemodel.description = oldmodel[0].description;
-            deletemodel.quantity = oldmodel[0].quantity;
             deletemodel.m_unit_id = oldmodel[0].m_unit_id;
             deletemodel.is_delete = true;
             deletemodel.created_by = oldmodel[0].created_by;
@@ -378,8 +364,7 @@ const MSouvenirController = {
                     "code" : "$code", 
                     "name" : "$name",
                     "description" : "$description", 
-                    "quantity" : "$quantity",
-                    "name_unit" : "$unit_lookup.name",
+                    "m_unit_id" : "$unit_lookup.name",
                     "m_unit_id" : "$unit_lookup._id",
                     //"name_unit" : "$unit_lookup.name",
                     "is_delete" : "$is_delete",
