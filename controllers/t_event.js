@@ -13,47 +13,47 @@ const EventController = {
         
         global.dbo.collection('t_event').aggregate([
             {
-                          $lookup:
-                          {
-                            from : "m_employee",
-                            localField : "request_by",
-                            foreignField : "_id",
-                            as : "employee_lookup"
-                          }
-                        },
-                        {
-                          $unwind : "$employee_lookup"
-                        },
-                        {
-                          $match: { "is_delete" : false }
-                        },
-                        {
-                          $project:
-                          {
-                            _id : 1,
-                            code : "$code", 
-                            event_name : "$event_name", 
-                            start_date : "$start_date", 
-                            end_date : "$end_date", 
-                            place : "$place", 
-                            budget : "$budget", 
-                            request_by : { $concat: [ "$employee_lookup.first_name", " ", "$employee_lookup.last_name" ] }, 
-                            request_date : { "$dateToString": { "format": "%d-%m-%Y", "date" : "$request_date"}}, 
-                            approved_by : "$approved_by", 
-                            approved_date : "$approved_date", 
-                            assign_to : "$assign_to", 
-                            closed_date : "$closed_date", 
-                            note : "$note", 
-                            status : "$status", 
-                            reject_reason : "$reject_reason", 
-                            is_delete : "$is_delete",
-                            created_by : "$created_by",
-                            created_date : { "$dateToString": { "format": "%d-%m-%Y", "date" : "$created_date"}},
-                            updated_by : "$updated_by",
-                            updated_date : "$updated_date" 
-                          }
-                        }
-                        ]).toArray((err, data) => {
+                $lookup:
+                {
+                from : "m_employee",
+                localField : "request_by",
+                foreignField : "_id",
+                as : "employee_lookup"
+                }
+            },
+            {
+                $unwind : "$employee_lookup"
+            }, 
+            {
+                $match: { "is_delete" : false }
+            },
+            {
+                $project:
+                {
+                _id : 1,
+                code : "$code", 
+                event_name : "$event_name", 
+                start_date : "$start_date", 
+                end_date : "$end_date", 
+                place : "$place", 
+                budget : "$budget", 
+                request_by : { $concat: [ "$employee_lookup.first_name", " ", "$employee_lookup.last_name" ] }, 
+                request_date : { "$dateToString": { "format": "%d-%m-%Y", "date" : "$request_date"}}, 
+                approved_by : "$approved_by", 
+                approved_date : "$approved_date", 
+                assign_to : "$assign_to", 
+                closed_date : "$closed_date", 
+                note : "$note", 
+                status : "$status", 
+                reject_reason : "$reject_reason", 
+                is_delete : "$is_delete",
+                created_by : "$created_by",
+                created_date : { "$dateToString": { "format": "%d-%m-%Y", "date" : "$created_date"}},
+                updated_by : "$updated_by",
+                updated_date : "$updated_date" 
+                }
+            }
+            ]).toArray((err, data) => {
             if(err){
                 return next (new Error());
             }
@@ -65,15 +65,88 @@ const EventController = {
             Response.send(res, 200, model);
         });
     },
-
+    GetDetail : (req, res, next) => {
+        let id = req.params.id;
+        logger.info("Initializing Event - getAll" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+        
+        global.dbo.collection('t_event').aggregate([
+            {
+                $lookup:
+                {
+                from : "m_employee",
+                localField : "request_by",
+                foreignField : "_id",
+                as : "employee_lookup"
+                }
+            },
+            {
+                $lookup:
+                {
+                from : "m_employee",
+                localField : "assign_to",
+                foreignField : "_id",
+                as : "assign_lookup"
+                }
+            },
+            {
+                $unwind : "$employee_lookup"
+            },
+            
+            {
+                $unwind : "$assign_lookup"
+            }, 
+            {
+                $match: 
+                    { 
+                        "is_delete" : false,
+                        "_id" : ObjectID(id)
+                    }
+            },
+            {
+                $project:
+                {
+                _id : 1,
+                code : "$code", 
+                event_name : "$event_name", 
+                start_date : "$start_date", 
+                end_date : "$end_date", 
+                place : "$place", 
+                budget : "$budget", 
+                request_by : { $concat: [ "$employee_lookup.first_name", " ", "$employee_lookup.last_name" ] }, 
+                request_date : { "$dateToString": { "format": "%d-%m-%Y", "date" : "$request_date"}}, 
+                approved_by : "$approved_by", 
+                approved_date : "$approved_date", 
+                assign_to : { $concat: [ "$assign_lookup.first_name", " ", "$assign_lookup.last_name" ] }, 
+                closed_date : "$closed_date", 
+                note : "$note", 
+                status : "$status", 
+                reject_reason : "$reject_reason", 
+                is_delete : "$is_delete",
+                created_by : "$created_by",
+                created_date : { "$dateToString": { "format": "%d-%m-%Y", "date" : "$created_date"}},
+                updated_by : "$updated_by",
+                updated_date : "$updated_date" 
+                }
+            }
+            ]).toArray((err, data) => {
+                if(err){
+                    logger.info("Event - Get Detail Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'))
+                    logger.error(err)
+                    return next(new Error());
+                }
+                    logger.info("Event - Get Detail Successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'))
+                    logger.info( { data, data} )
+                    Response.send(res, 200, data);
+        });
+    },
     Create : (req, res, next) => {
         let reqdata = req.body;
         var data = {};
 
         data.code           = reqdata.code;
         data.event_name     = reqdata.event_name; 
-        data.start_date     = reqdata.start_date; 
-        data.end_date       = reqdata.end_date; 
+        data.start_date     = new Date(reqdata.start_date); 
+        data.end_date       = new Date(reqdata.end_date); 
         data.place          = reqdata.place; 
         data.budget         = reqdata.budget; 
         data.request_by     = ObjectID(global.user.m_employee_id); 
@@ -308,7 +381,7 @@ const EventController = {
         });
     },
     UpdateByAdmin : (req, res, next) => {
-        logger.info("Initializing Event - Update" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+        logger.info("Initializing Event - Update By Admin" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
 
         let id = req.params.id;
         let reqdata = req.body;
@@ -329,12 +402,20 @@ const EventController = {
             console.log("Masuk");
             console.log(oldmodel);
 
+            
+            if(reqdata.reject_reason == null || reqdata.reject_reason == undefined || reqdata.reject_reason == "")
+            {
+                updatemodel.reject_reason = oldmodel[0].reject_reason;
+            }else{
+                updatemodel.reject_reason = reqdata.reject_reason;
+            }
             if(reqdata.status == null || reqdata.status == undefined || reqdata.status == "")
             {
                 updatemodel.status = oldmodel[0].status;
             }else{
                 updatemodel.status = reqdata.status;
             }
+
             updatemodel.code           = oldmodel[0].code;
             updatemodel.event_name     = oldmodel[0].event_name; 
             updatemodel.start_date     = oldmodel[0].start_date; 
@@ -347,6 +428,123 @@ const EventController = {
             updatemodel.approved_date  = now; 
             updatemodel.assign_to      = ObjectID(reqdata.assign_to); 
             updatemodel.closed_date    = oldmodel[0].closed_date; 
+            updatemodel.note           = oldmodel[0].note; 
+            updatemodel.is_delete      = oldmodel[0].is_delete; 
+            updatemodel.created_by     = oldmodel[0].created_by; 
+            updatemodel.created_date   = oldmodel[0].created_date; 
+            updatemodel.updated_by     = oldmodel[0].updated_by; 
+            updatemodel.updated_date   = oldmodel[0].updated_date;
+
+            var model = new t_eventModel(updatemodel);
+
+            global.dbo.collection('t_event').findOneAndUpdate
+            (
+                { '_id' : ObjectID(id)},
+                {$set : model},
+                function(err, data){
+                    if(err){
+                        return next(new Error());
+                    }
+
+                    Response.send(res, 200, data)
+                }
+            );
+        });
+    },
+    UpdateByAdminReject : (req, res, next) => {
+        logger.info("Initializing Event - Update By Admin" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
+        let id = req.params.id;
+        let reqdata = req.body;
+        var oldmodel = {};
+        var updatemodel = {};
+
+        global.dbo.collection('t_event').find( { is_delete : false, '_id' : ObjectID(id)}).toArray((err, data) => {
+            if(err){
+                return next(new Error());
+            }
+
+            oldmodel = data.map((entity) => {
+                return new t_eventModel(entity);
+            });
+
+            updatemodel._id = ObjectID(id);
+            
+            console.log("Masuk");
+            console.log(oldmodel);
+
+            updatemodel.code           = oldmodel[0].code;
+            updatemodel.event_name     = oldmodel[0].event_name; 
+            updatemodel.start_date     = oldmodel[0].start_date; 
+            updatemodel.end_date       = oldmodel[0].end_date; 
+            updatemodel.place          = oldmodel[0].place; 
+            updatemodel.budget         = oldmodel[0].budget; 
+            updatemodel.request_by     = oldmodel[0].request_by; 
+            updatemodel.request_date   = oldmodel[0].request_date; 
+            updatemodel.approved_by    = ObjectID(global.user.m_employee_id); 
+            updatemodel.approved_date  = now; 
+            updatemodel.assign_to      = ObjectID(reqdata.assign_to); 
+            updatemodel.closed_date    = oldmodel[0].closed_date; 
+            updatemodel.note           = oldmodel[0].note;
+            updatemodel.status         = 0;
+            updatemodel.reject_reason  = oldmodel[0].reject_reason; 
+            updatemodel.is_delete      = oldmodel[0].is_delete; 
+            updatemodel.created_by     = oldmodel[0].created_by; 
+            updatemodel.created_date   = oldmodel[0].created_date; 
+            updatemodel.updated_by     = oldmodel[0].updated_by; 
+            updatemodel.updated_date   = oldmodel[0].updated_date;
+
+            var model = new t_eventModel(updatemodel);
+
+            global.dbo.collection('t_event').findOneAndUpdate
+            (
+                { '_id' : ObjectID(id)},
+                {$set : model},
+                function(err, data){
+                    if(err){
+                        return next(new Error());
+                    }
+
+                    Response.send(res, 200, data)
+                }
+            );
+        });
+    },
+    UpdateByStaff : (req, res, next) => {
+        logger.info("Initializing Event - Update By Staff" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
+        let id = req.params.id;
+        let reqdata = req.body;
+        var oldmodel = {};
+        var updatemodel = {};
+
+        global.dbo.collection('t_event').find( { is_delete : false, '_id' : ObjectID(id)}).toArray((err, data) => {
+            if(err){
+                return next(new Error());
+            }
+
+            oldmodel = data.map((entity) => {
+                return new t_eventModel(entity);
+            });
+
+            updatemodel._id = ObjectID(id);
+            
+            console.log("Masuk");
+            console.log(oldmodel);
+
+            updatemodel.code           = oldmodel[0].code;
+            updatemodel.event_name     = oldmodel[0].event_name; 
+            updatemodel.start_date     = oldmodel[0].start_date; 
+            updatemodel.end_date       = oldmodel[0].end_date; 
+            updatemodel.place          = oldmodel[0].place; 
+            updatemodel.budget         = oldmodel[0].budget; 
+            updatemodel.request_by     = oldmodel[0].request_by; 
+            updatemodel.request_date   = oldmodel[0].request_date; 
+            updatemodel.approved_by    = oldmodel[0].approved_by; 
+            updatemodel.approved_date  = oldmodel[0].approved_date; 
+            updatemodel.assign_to      = oldmodel[0].assign_to; 
+            updatemodel.closed_date    = now; 
+            updatemodel.status         = 3; 
             updatemodel.reject_reason  = oldmodel[0].reject_reason; 
             updatemodel.note           = oldmodel[0].note; 
             updatemodel.is_delete      = oldmodel[0].is_delete; 

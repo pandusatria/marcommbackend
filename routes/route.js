@@ -78,7 +78,7 @@ module.exports = exports = function(server){
     server.get('/api/employee/newedit/:id', Middleware.checkToken, m_employee.GetNewEdit);
 
     server.get('/api/employee/staff', Middleware.checkToken, m_employee.GetEmployeeStaff);
-
+    
     //Route Company
     server.get('/api/company/', Middleware.checkToken, m_company.GetAll);
 
@@ -90,9 +90,13 @@ module.exports = exports = function(server){
 
     //Route t_event
     server.get('/api/event/', Middleware.checkToken, t_event.GetAll);
+    server.get('/api/event/:id', Middleware.checkToken, t_event.GetDetail);
     server.post('/api/event/', Middleware.checkToken, t_event.Create);
     server.put('/api/event/:id', Middleware.checkToken, t_event.UpdateByRequester);
-    server.put('/api/event/admin/:id', Middleware.checkToken, t_event.UpdateByAdmin);
+    server.put('/api/event/admin/:id', Middleware.checkToken, t_event.UpdateByAdmin); // Admin Approved
+    server.put('/api/event/adminReject/:id', Middleware.checkToken, t_event.UpdateByAdminReject);
+    
+    server.put('/api/event/staff/:id', Middleware.checkToken, t_event.UpdateByStaff);
 
 
     //search event
@@ -103,7 +107,7 @@ module.exports = exports = function(server){
     //Route Unit
     server.get('/api/unit/',Middleware.checkToken, munit.GetAll);
 
-
+    //route handle search event
     server.get('/api/event/orderdesc', t_event.GetAllHandlerSortByDescending )
 
 };

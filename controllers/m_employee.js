@@ -409,7 +409,7 @@ const EmployeeController = {
                         "m_employee_id" : "$user_lookup.m_employee_id",
                         "m_role_id" : "$user_lookup.m_role_id",
                         "role" : "$role_lookup.name",
-                        _id :1
+                        _id : 1
                     }
             }
             ]).toArray((err, data) => {
