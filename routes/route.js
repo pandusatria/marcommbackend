@@ -54,6 +54,7 @@ module.exports = exports = function(server){
     server.del('/api/souvenir/:id', Middleware.checkToken, msouvenir.Delete);
     server.get('/api/souvenir/orderdesc', msouvenir.GetAllHandlerSortByDescending);
     server.post('/api/souvenir/search', Middleware.checkToken, msouvenir.GetAllHandlerSearch);
+    server.get('/api/souvenir/getselect', Middleware.checkToken, msouvenir.GetSelect);
 
     //Route t_souvenir
     server.get('/api/tsouvenir/', Middleware.checkToken, tsouvenir.GetAll);
@@ -72,7 +73,10 @@ module.exports = exports = function(server){
     server.put('/api/tsitem/:id', Middleware.checkToken, t_sitem.Update);
     server.del('/api/tsitem/:id', Middleware.checkToken, t_sitem.Delete);
     server.post('/api/tsitem/search', Middleware.checkToken, t_sitem.Search);
-
+    server.put('/api/tsitem/approved/:id', Middleware.checkToken, t_sitem.Approved);
+    server.put('/api/tsitem/rejected/:id', Middleware.checkToken, t_sitem.Rejected);
+    server.put('/api/tsitem/received/:id', Middleware.checkToken, t_sitem.Received);
+    
     // Route Employee
     server.get('/api/employee/', Middleware.checkToken, m_employee.GetAll);
     server.get('/api/employee/:id', Middleware.checkToken, m_employee.GetDetail);

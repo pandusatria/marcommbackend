@@ -407,6 +407,58 @@ const MSouvenirController = {
             logger.info({data : data}, "Souvenir : GetAllHandlerSortByDescending content");
             Response.send(res, 200, data);
         });
+    },
+    GetSelect : (req, res, next) => {
+        logger.info("Initialized Souvenir : GetSelect" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+
+        global.dbo.collection('m_souvenir').aggregate([
+            {
+                $lookup : {
+                from : "m_unit",
+                localField : "m_unit_id",
+                foreignField : "_id",
+                as : "unit_lookup"
+                }
+            },
+            {
+                $unwind : "$unit_lookup"  
+            },
+            {
+                $match : 
+                {
+                  is_delete : false, 
+                  quantity : { $gt: 0 }
+                }
+            },
+            {
+                $project:
+                {
+                    "_id" : "$_id", 
+                    "code" : "$code", 
+                    "name" : "$name",
+                    "description" : "$description", 
+                    "quantity" : "$quantity",
+                    "name_unit" : "$unit_lookup.name",
+                    "m_unit_id" : "$m_unit_id",
+                    "is_delete" : "$is_delete",
+                    "created_by" : "$created_by",
+                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
+                    "updated_by" : "$updated_by",
+                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } }
+                }
+            }	
+        ]).toArray((err, data) => {
+            if(err)
+            {
+                logger.info("Souvenir : GetSelect Error" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+                logger.error(err);
+                return next(new Error());
+            }
+
+            logger.info("Souvenir : GetSelect successfully" + " at " + moment().format('DD/MM/YYYY, hh:mm:ss a'));
+            logger.info({data : data}, "Souvenir : GetSelect content");
+            Response.send(res, 200, data);
+        });
     }
 };
 module.exports = MSouvenirController;

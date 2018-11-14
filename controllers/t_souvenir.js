@@ -226,52 +226,8 @@ const TSController = {
 
         global.dbo.collection('t_souvenir').aggregate([
             {
-                $lookup : {
-                from : "m_employee",
-                localField : "received_by",
-                foreignField : "_id",
-                as : "employee_lkup"
-                }
-            },
-            {
-                $unwind : "$employee_lkup"  
-            },
-            {
-                $lookup : {
-                from : "t_event",
-                localField : "t_event_id",
-                foreignField : "_id",
-                as : "tevent_lkup"
-                }
-            },
-            {
-                $unwind : "$tevent_lkup"  
-            },
-            {
                 $match : { is_delete : false}
             },
-            {
-                $project:
-                {
-                    "_id" : "$_id", 
-                    "code" : "$code", 
-                    "type" : "$type",
-                    "t_event_id" : "$t_event_id",
-                    "status_event" : "$tevent_lkup.status", 
-                    
-                    "received_by" : "$received_by", 
-                    "name_receiver" : { $concat: [ "$employee_lkup.first_name", " ", "$employee_lkup.last_name"] },
-                    "received_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$received_date" } },
-                    "note" : "$note",
-                    
-                    
-                    "is_delete" : "$is_delete",
-                    "created_by" : "$created_by",
-                    "created_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$created_date" } },
-                    "updated_by" : "$updated_by",
-                    "updated_date" : { "$dateToString": { "format": "%Y-%m-%d", "date": "$updated_date" } }   
-                }
-            },	
             {
               $sort:{"_id":-1}
             },
